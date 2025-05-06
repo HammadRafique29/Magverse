@@ -1,13 +1,9 @@
-Absolutely! Here's a clean, beautiful, and beginner-friendly `README.md` tailored for your **AI Story Video Generator** Electron app:
-
----
-
-# 🎬 AI Story Video Generator
+# 🎬 AI Story Video Generator (UNDER DEVELOPMENT)
 
 Turn a single line of text ✍️ into a complete story video 📽️, all on your desktop!
-
 **AI Story Video Generator** is a powerful and creative Electron-based desktop app that uses cutting-edge open-source AI tools to generate story-based videos from just a one-line idea.
 
+<br>
 
 ## ✨ Features
 
@@ -16,6 +12,8 @@ Turn a single line of text ✍️ into a complete story video 📽️, all on yo
 - 🎧 Integrated with **xtts-v2** for natural-sounding voice narration
 - 🖥️ Cross-platform desktop app built with **Electron**
 - 🔓 100% open-source — customize or extend as you wish!
+
+<br>
 
 ## 🛠️ Installation
 
@@ -102,7 +100,7 @@ npm start
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — feel free to use, modify, and distribute.
+This project is licensed under the **MIT License**, feel free to use, modify, and distribute.
 
 
 ## 🙌 Credits
