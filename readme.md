@@ -11,7 +11,7 @@ Turn a single line of text ✍️ into a complete story video 📽️, all on yo
 - 🖼️ Uses open-source **image generation models** to visualize scenes
 - 🎧 Integrated with **xtts-v2** for natural-sounding voice narration
 - 🖥️ Cross-platform desktop app built with **Electron**
-- 🔓 100% open-source — customize or extend as you wish
+- 🔓 100% open-source — customize or extend as you wish!
 
 <br>
 
