@@ -94,6 +94,13 @@
   }
   
 
+  #AI_generated_scenes {
+    width: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    column-gap: 50px;
+  }
 
   .generated_scenes_ {
     position: relative; width: 45%;height: 200px;
