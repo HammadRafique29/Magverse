@@ -58,9 +58,9 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    row-gap: 10px;
+    /* row-gap: 10px; */
   }
-  .content #start_ {
+  .content #next_ {
     width: 20%;
     height: 8%;
     border-radius: 10px;
@@ -75,7 +75,7 @@
     transition: all 0.2s ease-in-out;
   
   }
-  .content #start_:hover {
+  .content #next_:hover {
     cursor: pointer;
     border-radius: 15px;
     border: 1px solid gray;

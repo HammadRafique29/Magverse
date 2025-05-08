@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>My Electron App</title>
@@ -7,29 +8,27 @@
 </head>
 
 <body>
-    <header>
-      <div class="navbar">
-        <h1>Story Generator<span class="tagline">. Generate Animated Story With AI</span></h1>
-      </div>
-    </header>
-
-    <div class="content">
-        <div id="message">
-          <p style="font-size: 7vh;color: white;font-weight: bold;">Welcome To Story Generator</p>
-          <p style="font-size: 3vh;color: white;font-weight: bold;">Let Build something Special Together</p>
-        </div>
-        <button id="start_">
-          Start Now
-        </button>
+  <header>
+    <div class="navbar">
+      <h1>Story Generator<span class="tagline">. Generate Animated Story With AI</span></h1>
     </div>
-    <script type="module"  src="scripts/index.js"></script>
-</body>
-<!-- 
-<body>
-  <h1>Electron App</h1>
-  <button id="fetchBtn">Fetch Data</button>
-  <p id="response"></p>
+  </header>
 
-  <script type="module"  src="scripts/index.js"></script>
-</body> -->
+  <div class="content">
+    <div id="message">
+      <p style="font-size: 7vh;color: white;font-weight: bold;">Welcome To Story Generator</p>
+      <p style="font-size: 3vh;color: white;font-weight: normal;">Let Build something Special Together</p>
+    </div>
+    <button id="next_">
+      Start Now
+    </button>
+  </div>
+  <script type="module" src="scripts/index.js"></script>
+
+  <script>
+    document.getElementById('next_').addEventListener('click', () => {
+      window.location.href = 'prompt_page.html';
+    });
+  </script>
+</body>
 </html>
