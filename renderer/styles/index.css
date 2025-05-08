@@ -100,6 +100,8 @@
     justify-content: center;
     align-items: center;
     column-gap: 50px;
+    flex-wrap: wrap;
+    row-gap: 20px;
   }
 
   .generated_scenes_ {
