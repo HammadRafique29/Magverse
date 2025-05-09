@@ -15,22 +15,131 @@
         </div>
     </header>
 
-    <div class="content">
+    <div class="content" style="row-gap: 20px">
         <div id="message">
             <p style="font-size: 7vh;color: white;font-weight: bold;">Here is most beautiful Part  </p>
         </div>
-        <div id="prompt_input">
-            <input type="text" placeholder="Tell me somthing about you're story...">
-        </div>
-        <div style="width: 40%;height: 8%; display: flex;justify-content: center;align-items: center;column-gap: 10px;">
-            <button onclick="go_back()" class="page_control_" id="back_"
-                style="background-color: rgba(128, 128, 128, 0.308); width: 45%; height: 100%;">
-                Back
-            </button>
-            
-            <div>
+
+        <div id="redering_image_container" 
+            style="display: flex; flex-direction: column; justify-content: flex-start; align-items: center; row-gap: 40px; padding: 20px; position: 
+            relative; z-index: 9; width: 80%;height: 80%; margin-top: -30px; border-radius: 10px; overflow-y: scroll;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* IE and Edge */
+            ">
+            <div id="rendered_image_1" style="width: 90%;height: 35%; display: flex;column-gap: 10px;">
+                
+                <div class="rendered_image_container" style="width: 35%;height: 100%;border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.493);">
+                    <img src="../assets/img/renderd_img.png" width="100%" height="100%" style="border-radius: 10px;" alt="" srcset="">
+                </div>
+
+                <div class="rendered_image_details_container" style="width: 60%;display: flex;flex-direction: column; row-gap: 10px;">
+                    <div id="scene_2" class="generated_scenes_" style="width: 100%; ">
+                        <div class="scene_ids_">Scene1</div>
+                        <div class="scene_prompt_">
+                            <textarea class="scene_prompt_textarea" name="scene_output_1" id="scene_output_1" cols="30">Once we get the prompts, we will save it into google sheets, you're BG  friend will look into them and select the best scenes. Than he will copy & paste then text-to-image or video prompts to generate the  content.
+                            </textarea>
+                        </div>
+                        <div class="scenes_controls_">
+                            <button type="button" class="refresh_prompt_btn_">
+                                <img src="../assets/img/refresh.png" width="30" height="30" style="background-color:transparent;" alt="" srcset="">
+                            </button>
+                            <button id="update_prompt" class="update_prompt_btn_">Update</button>
+                        </div>
+                    </div>
+
+                    <div class="image_generation_settings_"
+                        style="width: 99%; height: 20%; display: flex; justify-content: flex-start;align-items: center;">
+                        <button type="button" class="re-generate_image_ render_image_style_">
+                            Re-generate Image
+                        </button>
+                        <select class="image_resolution_ render_image_style_">
+                            <option>720 x 1080</option>
+                            <option>1080 x 1920</option>
+                            <option>1920 x 1080</option>
+                        </select>
+                    </div>
+                </div>
                 
             </div>
+
+            <div id="rendered_image_1" style="width: 90%;height: 35%; display: flex;column-gap: 10px;">
+                
+                <div class="rendered_image_container" style="width: 35%;height: 100%;border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.493);">
+                    <img src="../assets/img/renderd_img.png" width="100%" height="100%" style="border-radius: 10px;" alt="" srcset="">
+                </div>
+
+                <div class="rendered_image_details_container" style="width: 60%;display: flex;flex-direction: column; row-gap: 10px;">
+                    <div id="scene_2" class="generated_scenes_" style="width: 100%; ">
+                        <div class="scene_ids_">Scene1</div>
+                        <div class="scene_prompt_">
+                            <textarea class="scene_prompt_textarea" name="scene_output_1" id="scene_output_1" cols="30">Once we get the prompts, we will save it into google sheets, you're BG  friend will look into them and select the best scenes. Than he will copy & paste then text-to-image or video prompts to generate the  content.
+                            </textarea>
+                        </div>
+                        <div class="scenes_controls_">
+                            <button type="button" class="refresh_prompt_btn_">
+                                <img src="../assets/img/refresh.png" width="30" height="30" style="background-color:transparent;" alt="" srcset="">
+                            </button>
+                            <button id="update_prompt" class="update_prompt_btn_">Update</button>
+                        </div>
+                    </div>
+
+                    <div class="image_generation_settings_"
+                        style="width: 99%; height: 20%; display: flex; justify-content: flex-start;align-items: center;">
+                        <button type="button" class="re-generate_image_ render_image_style_">
+                            Re-generate Image
+                        </button>
+                        <select class="image_resolution_ render_image_style_">
+                            <option>720 x 1080</option>
+                            <option>1080 x 1920</option>
+                            <option>1920 x 1080</option>
+                        </select>
+                    </div>
+                </div>
+                
+            </div>
+
+            <div id="rendered_image_1" style="width: 90%;height: 35%; display: flex;column-gap: 10px;">
+                
+                <div class="rendered_image_container" style="width: 35%;height: 100%;border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.493);">
+                    <img src="../assets/img/renderd_img.png" width="100%" height="100%" style="border-radius: 10px;" alt="" srcset="">
+                </div>
+
+                <div class="rendered_image_details_container" style="width: 60%;display: flex;flex-direction: column; row-gap: 10px;">
+                    <div id="scene_2" class="generated_scenes_" style="width: 100%; ">
+                        <div class="scene_ids_">Scene1</div>
+                        <div class="scene_prompt_">
+                            <textarea class="scene_prompt_textarea" name="scene_output_1" id="scene_output_1" cols="30">Once we get the prompts, we will save it into google sheets, you're BG  friend will look into them and select the best scenes. Than he will copy & paste then text-to-image or video prompts to generate the  content.
+                            </textarea>
+                        </div>
+                        <div class="scenes_controls_">
+                            <button type="button" class="refresh_prompt_btn_">
+                                <img src="../assets/img/refresh.png" width="30" height="30" style="background-color:transparent;" alt="" srcset="">
+                            </button>
+                            <button id="update_prompt" class="update_prompt_btn_">Update</button>
+                        </div>
+                    </div>
+
+                    <div class="image_generation_settings_"
+                        style="width: 99%; height: 20%; display: flex; justify-content: flex-start;align-items: center;">
+                        <button type="button" class="re-generate_image_ render_image_style_">
+                            Re-generate Image
+                        </button>
+                        <select class="image_resolution_ render_image_style_">
+                            <option>720 x 1080</option>
+                            <option>1080 x 1920</option>
+                            <option>1920 x 1080</option>
+                        </select>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <div style="z-index: 11; position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 40%;height: 5%; display: flex;justify-content: center;align-items: center;column-gap: 10px;">
+            <button onclick="go_back()" class="page_control_" id="back_"
+            style="z-index: 10; background-color: rgba(128, 128, 128, 0.308); width: 45%; height: 100%;">
+                Back
+            </button>
 
             <button onclick="open_upload_popup()" class="page_control_" id="next_" style="display: flex; align-items: center; column-gap: 5px; width: 35%; height: 100%; display: flex;justify-content: center;align-items: center;">
                 <p id="generate_text">Generate Audio</p>
