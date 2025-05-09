@@ -60,7 +60,7 @@
     align-items: center;
     /* row-gap: 10px; */
   }
-  .content #next_ {
+  .page_control_ {
     width: 20%;
     height: 8%;
     border-radius: 10px;
@@ -75,7 +75,7 @@
     transition: all 0.2s ease-in-out;
   
   }
-  .content #next_:hover {
+  .page_control_:hover {
     cursor: pointer;
     border-radius: 15px;
     border: 1px solid gray;
@@ -136,5 +136,18 @@
     background-color: transparent;outline: none;border: none;
   }
   .update_prompt_btn_ {
-    height: auto;border-radius: 5px; padding: 10px 25px;font-size: 1.3vh;
+    height: auto;border-radius: 5px; padding: 10px 25px;font-size: 1.3vh;outline: none;border: none;
   }
+
+  .refresh_prompt_btn_:hover {
+    cursor: pointer;
+  }
+  .update_prompt_btn_:hover {
+    cursor: pointer;
+  }
+
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
