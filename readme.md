@@ -1,4 +1,4 @@
-# 🎬 AI Story Video Generator (UNDER DEVELOPMENT)
+# 🎬 AI Story Video Generator  - (UNDER DEVELOPMENT)
 
 Turn a single line of text ✍️ into a complete story video 📽️, all on your desktop!
 **AI Story Video Generator** is a powerful and creative Electron-based desktop app that uses cutting-edge open-source AI tools to generate story-based videos from just a one-line idea.
