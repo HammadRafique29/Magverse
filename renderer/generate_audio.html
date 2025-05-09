@@ -80,9 +80,11 @@
         const upload_popup = document.getElementById("upload_audio");
         const loader = document.getElementById("loading_animation");
         const generateText = document.getElementById("generate_text");
+        let is_audios_genereted = false;
 
         function open_upload_popup() {
-            upload_popup.style.display = "block";
+            if (is_audios_genereted) go_next();
+            else upload_popup.style.display = "block";
         }
 
         function close_upload_popup() {
@@ -107,6 +109,7 @@
 
             if (isValidAudioFile(file)) {
                 if (upload_popup) upload_popup.style.display = "none";
+                is_audios_genereted = true;
             } else {
                 alert("Please Select Speaker File Path First (Audio)...")
             }
@@ -114,6 +117,9 @@
             generateText.style.display = "flex";
         }
 
+        function go_next(){
+            window.location.href = 'image_render.html';
+        }
         function go_back(){
             history.back()
         }
