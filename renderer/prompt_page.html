@@ -23,7 +23,7 @@
         <div id="prompt_input">
             <input type="text" placeholder="Tell me somthing about you're story...">
         </div>
-        <button id="next_">
+        <button id="next_" class="page_control_">
             Next
         </button>
     </div>
@@ -32,6 +32,10 @@
         document.getElementById('next_').addEventListener('click', () => {
             window.location.href = 'story_scenes.html';
         });
+
+        function go_back(){
+            history.back()
+        }
     </script>
 </body>
 
