@@ -1,6 +1,6 @@
 
 #prompt_input {
-  width: 40%;
+  width: 50%;
   height: 100%;
   border-radius: 10px;
   padding: 10px;
@@ -19,11 +19,11 @@
   color: #b2b2b2;
 }
 
-#video_length_input{
+.select_input_{
   width: 8vw;height: 100%; max-width: 134px;
 }
 
-#video_length_input select {
+.select_input_ select {
   width: 100%; 
   height: 100%;
   font-size: 2vh; 
@@ -39,8 +39,10 @@
   overflow-y: auto;
   overflow-y: auto; /* Allows scrolling */
   scrollbar-width: none; /* Hides scrollbar in Firefox */
+  background-color: #88808075;
+  color: rgb(168, 166, 166);
 }
 
-#video_length_input  select::-webkit-scrollbar {
+.select_input_  select::-webkit-scrollbar {
   display: none; /* Hides scrollbar in WebKit browsers */
 }
