@@ -6,6 +6,138 @@
     <title>My Electron App</title>
     <link rel="stylesheet" href="styles/index.css">
     <link rel="stylesheet" href="styles/prompt.css">
+    <style>
+
+        /* Rendering Image Container Styles */
+        #redering_image_container {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            row-gap: 40px;
+            padding: 20px;
+            position: relative;
+            z-index: 9;
+            width: 80%;
+            height: 80%;
+            margin-top: -30px;
+            border-radius: 10px;
+            overflow-y: scroll;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        #redering_image_container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Rendered Image Styles */
+        #rendered_image_1 {
+            width: 90%;
+            height: 35%;
+            display: flex;
+            column-gap: 10px;
+        }
+
+        .rendered_image_container {
+            width: 35%;
+            height: 100%;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.493);
+        }
+
+        .rendered_image_container img {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .rendered_image_details_container {
+            width: 60%;
+            display: flex;
+            flex-direction: column;
+            row-gap: 10px;
+        }
+
+        /* Scene Styles */
+        .generated_scenes_ {
+            width: 100%;
+        }
+
+        .scene_ids_ {
+            font-weight: bold;
+        }
+
+        .scene_prompt_textarea {
+            width: 100%;
+            resize: vertical;
+        }
+
+        .scenes_controls_ {
+            display: flex;
+            gap: 5px;
+        }
+
+        .scenes_controls_ button {
+            cursor: pointer;
+        }
+
+        /* Image Generation Settings Styles */
+        .image_generation_settings_ {
+            width: 99%;
+            height: 20%;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .render_image_style_ {
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: #555;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Loader Styles */
+        .loader {
+            display: none;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid rgb(255, 255, 255);
+            border-radius: 50%;
+            width: 3vh;
+            height: 3vh;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Absolute Positioning Styles */
+        .bottom_controls {
+            z-index: 11;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 98%;
+            height: 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            column-gap: 10px;
+        }
+    </style>
 </head>
 
 <body>
@@ -15,25 +147,20 @@
         </div>
     </header>
 
-    <div class="content" style="row-gap: 20px">
+    <div class="content">
         <div id="message">
-            <p style="font-size: 7vh;color: white;font-weight: bold;">Here is the most beautiful Part  </p>
+            <p>Here is the most beautiful Part </p>
         </div>
 
-        <div id="redering_image_container" 
-            style="display: flex; flex-direction: column; justify-content: flex-start; align-items: center; row-gap: 40px; padding: 20px; position: 
-            relative; z-index: 9; width: 80%;height: 80%; margin-top: -30px; border-radius: 10px; overflow-y: scroll;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none;  /* IE and Edge */
-            ">
-            <div id="rendered_image_1" style="width: 90%;height: 35%; display: flex;column-gap: 10px;">
-                
-                <div class="rendered_image_container" style="width: 35%;height: 100%;border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.493);">
-                    <img src="../assets/img/renderd_img.png" width="100%" height="100%" style="border-radius: 10px;" alt="" srcset="">
+        <div id="redering_image_container">
+            <div id="rendered_image_1">
+
+                <div class="rendered_image_container">
+                    <img src="../assets/img/renderd_img.png" alt="" srcset="">
                 </div>
 
-                <div class="rendered_image_details_container" style="width: 60%;display: flex;flex-direction: column; row-gap: 10px;">
-                    <div id="scene_2" class="generated_scenes_" style="width: 100%; ">
+                <div class="rendered_image_details_container">
+                    <div id="scene_2" class="generated_scenes_">
                         <div class="scene_ids_">Scene1</div>
                         <div class="scene_prompt_">
                             <textarea class="scene_prompt_textarea" name="scene_output_1" id="scene_output_1" cols="30">Once we get the prompts, we will save it into google sheets, you're BG  friend will look into them and select the best scenes. Than he will copy & paste then text-to-image or video prompts to generate the  content.
@@ -41,14 +168,14 @@
                         </div>
                         <div class="scenes_controls_">
                             <button type="button" class="refresh_prompt_btn_">
-                                <img src="../assets/img/refresh.png" width="30" height="30" style="background-color:transparent;" alt="" srcset="">
+                                <img src="../assets/img/refresh.png" width="30" height="30"
+                                    style="background-color:transparent;" alt="" srcset="">
                             </button>
                             <button id="update_prompt" class="update_prompt_btn_">Update</button>
                         </div>
                     </div>
 
-                    <div class="image_generation_settings_"
-                        style="width: 99%; height: 20%; display: flex; justify-content: flex-start;align-items: center;">
+                    <div class="image_generation_settings_">
                         <button type="button" class="re-generate_image_ render_image_style_">
                             Re-generate Image
                         </button>
@@ -59,17 +186,17 @@
                         </select>
                     </div>
                 </div>
-                
+
             </div>
 
-            <div id="rendered_image_1" style="width: 90%;height: 35%; display: flex;column-gap: 10px;">
-                
-                <div class="rendered_image_container" style="width: 35%;height: 100%;border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.493);">
-                    <img src="../assets/img/renderd_img.png" width="100%" height="100%" style="border-radius: 10px;" alt="" srcset="">
+            <div id="rendered_image_1">
+
+                <div class="rendered_image_container">
+                    <img src="../assets/img/renderd_img.png" alt="" srcset="">
                 </div>
 
-                <div class="rendered_image_details_container" style="width: 60%;display: flex;flex-direction: column; row-gap: 10px;">
-                    <div id="scene_2" class="generated_scenes_" style="width: 100%; ">
+                <div class="rendered_image_details_container">
+                    <div id="scene_2" class="generated_scenes_">
                         <div class="scene_ids_">Scene1</div>
                         <div class="scene_prompt_">
                             <textarea class="scene_prompt_textarea" name="scene_output_1" id="scene_output_1" cols="30">Once we get the prompts, we will save it into google sheets, you're BG  friend will look into them and select the best scenes. Than he will copy & paste then text-to-image or video prompts to generate the  content.
@@ -77,14 +204,14 @@
                         </div>
                         <div class="scenes_controls_">
                             <button type="button" class="refresh_prompt_btn_">
-                                <img src="../assets/img/refresh.png" width="30" height="30" style="background-color:transparent;" alt="" srcset="">
+                                <img src="../assets/img/refresh.png" width="30" height="30"
+                                    style="background-color:transparent;" alt="" srcset="">
                             </button>
                             <button id="update_prompt" class="update_prompt_btn_">Update</button>
                         </div>
                     </div>
 
-                    <div class="image_generation_settings_"
-                        style="width: 99%; height: 20%; display: flex; justify-content: flex-start;align-items: center;">
+                    <div class="image_generation_settings_">
                         <button type="button" class="re-generate_image_ render_image_style_">
                             Re-generate Image
                         </button>
@@ -95,17 +222,17 @@
                         </select>
                     </div>
                 </div>
-                
+
             </div>
 
-            <div id="rendered_image_1" style="width: 90%;height: 35%; display: flex;column-gap: 10px;">
-                
-                <div class="rendered_image_container" style="width: 35%;height: 100%;border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.493);">
-                    <img src="../assets/img/renderd_img.png" width="100%" height="100%" style="border-radius: 10px;" alt="" srcset="">
+            <div id="rendered_image_1">
+
+                <div class="rendered_image_container">
+                    <img src="../assets/img/renderd_img.png" alt="" srcset="">
                 </div>
 
-                <div class="rendered_image_details_container" style="width: 60%;display: flex;flex-direction: column; row-gap: 10px;">
-                    <div id="scene_2" class="generated_scenes_" style="width: 100%; ">
+                <div class="rendered_image_details_container">
+                    <div id="scene_2" class="generated_scenes_">
                         <div class="scene_ids_">Scene1</div>
                         <div class="scene_prompt_">
                             <textarea class="scene_prompt_textarea" name="scene_output_1" id="scene_output_1" cols="30">Once we get the prompts, we will save it into google sheets, you're BG  friend will look into them and select the best scenes. Than he will copy & paste then text-to-image or video prompts to generate the  content.
@@ -113,14 +240,14 @@
                         </div>
                         <div class="scenes_controls_">
                             <button type="button" class="refresh_prompt_btn_">
-                                <img src="../assets/img/refresh.png" width="30" height="30" style="background-color:transparent;" alt="" srcset="">
+                                <img src="../assets/img/refresh.png" width="30" height="30"
+                                    style="background-color:transparent;" alt="" srcset="">
                             </button>
                             <button id="update_prompt" class="update_prompt_btn_">Update</button>
                         </div>
                     </div>
 
-                    <div class="image_generation_settings_"
-                        style="width: 99%; height: 20%; display: flex; justify-content: flex-start;align-items: center;">
+                    <div class="image_generation_settings_">
                         <button type="button" class="re-generate_image_ render_image_style_">
                             Re-generate Image
                         </button>
@@ -131,21 +258,19 @@
                         </select>
                     </div>
                 </div>
-                
+
             </div>
         </div>
 
-        <div style="z-index: 11; position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 98%;height: 5%; display: flex;justify-content: space-between;align-items: center;column-gap: 10px;">
-            <button onclick="go_back()" class="page_control_" id="back_"
-                style="font-size: 2vh; z-index: 10; background-color: rgba(128, 128, 128, 0.308); width: 12%; height: 100%;">
+        <div class="bottom_controls">
+            <button onclick="go_back()" class="page_control_" id="back_">
                 Back
             </button>
 
-            <button onclick="open_upload_popup()" class="page_control_" id="next_" style="display: flex; font-size: 2vh; align-items: center; column-gap: 5px; width: 12%; height: 100%; display: flex;justify-content: center;align-items: center;">
+            <button onclick="open_upload_popup()" class="page_control_" id="next_">
                 <p id="generate_text">Generate Video</p>
 
-                <div class="loader" id="loading_animation"
-                    style="display: none; border: 4px solid rgba(0, 0, 0, 0.1); border-top: 4px solid rgb(255, 255, 255); border-radius: 50%; width: 3vh; height: 3vh; animation: spin 2s linear infinite;">
+                <div class="loader" id="loading_animation">
                 </div>
             </button>
         </div>
@@ -156,7 +281,7 @@
             window.location.href = 'story_scenes.html';
         });
 
-        function go_back(){
+        function go_back() {
             history.back()
         }
     </script>

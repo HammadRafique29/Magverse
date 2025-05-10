@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>My Electron App</title>
+    <title>Magverse</title>
     <link rel="stylesheet" href="styles/index.css">
     <link rel="stylesheet" href="styles/prompt.css">
 </head>
@@ -11,7 +11,7 @@
 <body>
     <header>
         <div class="navbar">
-            <h1>Story Generator<span class="tagline">. Generate Animated Story With AI</span></h1>
+            <h1>Magverse<span class="tagline">. Generate Animated Story With AI</span></h1>
         </div>
     </header>
 
@@ -20,17 +20,52 @@
             <p style="font-size: 7vh;color: white;font-weight: bold;">We will love to hear you Idea’s  </p>
             <p style="font-size: 3vh;color: white;font-weight: normal;">And leave everything on us</p>
         </div>
-        <div id="prompt_input">
-            <input type="text" placeholder="Tell me somthing about you're story...">
+        <div style="width: 99%; display: flex;justify-content: center;align-items: center;column-gap: 10px;height: 7vh">
+            <div id="prompt_input">
+                <input type="text" id="story_input" placeholder="Tell me somthing about you're story...">
+            </div>
+            <div id="video_length_input">
+                <select id="video_length_input_select">
+                    <option value="" selected>Duration</option>
+                    <option value="2">2 min</option>
+                    <option value="5">5 min</option>
+                    <option value="10">10 min</option>
+                    <option value="30">30 min</option>
+                    <option value="50">50 min</option>
+                    <option value="70">70 min</option>
+                    <option value="100">100 min</option>
+                </select>
+            </div>
         </div>
+        
         <button id="next_" class="page_control_">
             Next
         </button>
     </div>
     <script type="module" src="scripts/index.js"></script>
     <script>
+
+        const durtion = document.getElementById("video_length_input_select")
+        const story_input = document.getElementById("story_input")
+        
+        function verify_inputs() {
+            let durationValue = durtion.value;
+            let story_prompt = story_input.value;
+            if (durationValue && story_prompt) {
+                console.log(`Prompt: ${story_prompt}  Duration: ${durationValue}`)
+                return story_prompt, durationValue
+            }
+            else {
+                alert(!durationValue? "Please select the duration of video" : "Please share your story idea...");
+                return false;
+            }
+        }
+            
         document.getElementById('next_').addEventListener('click', () => {
-            window.location.href = 'story_scenes.html';
+            if (verify_inputs()){
+                window.location.href = 'story_scenes.html';
+            }
+            
         });
 
         function go_back(){
