@@ -20,25 +20,35 @@
             <p style="font-size: 7vh;color: white;font-weight: bold;">We will love to hear you Idea’s  </p>
             <p style="font-size: 3vh;color: white;font-weight: normal;">And leave everything on us</p>
         </div>
-        <div style="width: 99%; display: flex;justify-content: center;align-items: center;column-gap: 10px;height: 7vh">
-            <div id="prompt_input">
+        <div style="width: 99%; display: flex;flex-direction: column; justify-content: center;align-items: center;row-gap: 5px;height: 10vh;margin-top: 2vh;">
+            <div id="prompt_input" style="max-width: 800px;">
                 <input type="text" id="story_input" placeholder="Tell me somthing about you're story...">
             </div>
-            <div id="video_length_input">
-                <select id="video_length_input_select">
-                    <option value="" selected>Duration</option>
-                    <option value="2">2 min</option>
-                    <option value="5">5 min</option>
-                    <option value="10">10 min</option>
-                    <option value="30">30 min</option>
-                    <option value="50">50 min</option>
-                    <option value="70">70 min</option>
-                    <option value="100">100 min</option>
-                </select>
+            <div style="display: flex;width: 40%;column-gap: 5px;justify-content: center;">
+                <div class="select_input_" id="video_length_input">
+                    <select id="video_length_input_select">
+                        <option value="" selected>Duration</option>
+                        <option value="2">2 min</option>
+                        <option value="5">5 min</option>
+                        <option value="10">10 min</option>
+                        <option value="30">30 min</option>
+                        <option value="50">50 min</option>
+                        <option value="70">70 min</option>
+                        <option value="100">100 min</option>
+                    </select>
+                </div>
+                <div class="select_input_" id="Video_Resolution_" style="width: 10vw;max-width: 150px">
+                    <select id="Video_Resolution_input_select" style="width: 100%;">
+                        <option value="" selected>Resolution</option>
+                        <option value="1280x720">1280x720</option>
+                        <option value="720x1280">720x1280</option>
+                    </select>
+                </div>
             </div>
+            
         </div>
         
-        <button id="next_" class="page_control_">
+        <button id="next_" class="page_control_" style="position: relative;bottom: -2vh;">
             Next
         </button>
     </div>
