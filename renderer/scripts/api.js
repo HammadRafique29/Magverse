@@ -5,3 +5,11 @@ export async function fetchExample(name) {
 export async function generateScenes(prompt, duration) {
   return await window.api.call('example:generateScenes', { prompt, duration });
 }
+
+export async function refreshScene(story_id, scene_id) {
+  return await window.api.call('example:refreshScene', { story_id, scene_id });
+}
+
+export async function updateScene(story_id, scene_id, new_scene) {
+  return await window.api.call('example:updateScene', { story_id, scene_id, new_scene });
+}

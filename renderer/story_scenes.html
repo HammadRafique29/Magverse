@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>My Electron App</title>
     <link rel="stylesheet" href="styles/index.css">
     <link rel="stylesheet" href="styles/scenes.css">
 </head>
+
 <body>
     <header>
         <div class="navbar">
@@ -18,98 +20,9 @@
             <p>We generated some Scenes for you</p>
         </div>
 
-        <div id="AI_generated_scenes">
-            <div id="scene_1" class="generated_scenes_">
-                <div class="scene_ids_">Scene1</div>
-                <div class="scene_prompt_">
-                    <textarea class="scene_prompt_textarea" name="scene_output_1" id="scene_output_1" cols="30">
-Once we get the prompts, we will save it into google sheets, you're BG  friend will look into them and select the best scenes. Than he will copy & paste then text-to-image or video prompts to generate the  content.
-                    </textarea>
-                </div>
-                <div class="scenes_controls_">
-                    <button type="button" class="refresh_prompt_btn_">
-                        <img src="../assets/img/refresh.png" width="30" height="30" style="background-color:transparent;" alt="" srcset="">
-                    </button>
-                    <button id="update_prompt" class="update_prompt_btn_">Update</button>
-                </div>
-            </div>
+        <div id="AI_generated_scenes"></div>
+            
 
-            <div id="scene_2" class="generated_scenes_">
-                <div class="scene_ids_">Scene1</div>
-                <div class="scene_prompt_">
-                    <textarea class="scene_prompt_textarea" name="scene_output_1" id="scene_output_1" cols="30">
-Once we get the prompts, we will save it into google sheets, you're BG  friend will look into them and select the best scenes. Than he will copy & paste then text-to-image or video prompts to generate the  content.
-                    </textarea>
-                </div>
-                <div class="scenes_controls_">
-                    <button type="button" class="refresh_prompt_btn_">
-                        <img src="../assets/img/refresh.png" width="30" height="30" style="background-color:transparent;" alt="" srcset="">
-                    </button>
-                    <button id="update_prompt" class="update_prompt_btn_">Update</button>
-                </div>
-            </div>
-
-            <div id="scene_1" class="generated_scenes_">
-                <div class="scene_ids_">Scene1</div>
-                <div class="scene_prompt_">
-                    <textarea class="scene_prompt_textarea" name="scene_output_1" id="scene_output_1" cols="30">
-Once we get the prompts, we will save it into google sheets, you're BG  friend will look into them and select the best scenes. Than he will copy & paste then text-to-image or video prompts to generate the  content.
-                    </textarea>
-                </div>
-                <div class="scenes_controls_">
-                    <button type="button" class="refresh_prompt_btn_">
-                        <img src="../assets/img/refresh.png" width="30" height="30" style="background-color:transparent;" alt="" srcset="">
-                    </button>
-                    <button id="update_prompt" class="update_prompt_btn_">Update</button>
-                </div>
-            </div>
-
-            <div id="scene_2" class="generated_scenes_">
-                <div class="scene_ids_">Scene1</div>
-                <div class="scene_prompt_">
-                    <textarea class="scene_prompt_textarea" name="scene_output_1" id="scene_output_1" cols="30">
-Once we get the prompts, we will save it into google sheets, you're BG  friend will look into them and select the best scenes. Than he will copy & paste then text-to-image or video prompts to generate the  content.
-                    </textarea>
-                </div>
-                <div class="scenes_controls_">
-                    <button type="button" class="refresh_prompt_btn_">
-                        <img src="../assets/img/refresh.png" width="30" height="30" style="background-color:transparent;" alt="" srcset="">
-                    </button>
-                    <button id="update_prompt" class="update_prompt_btn_">Update</button>
-                </div>
-            </div>
-
-            <div id="scene_1" class="generated_scenes_">
-                <div class="scene_ids_">Scene1</div>
-                <div class="scene_prompt_">
-                    <textarea class="scene_prompt_textarea" name="scene_output_1" id="scene_output_1" cols="30">
-Once we get the prompts, we will save it into google sheets, you're BG  friend will look into them and select the best scenes. Than he will copy & paste then text-to-image or video prompts to generate the  content.
-                    </textarea>
-                </div>
-                <div class="scenes_controls_">
-                    <button type="button" class="refresh_prompt_btn_">
-                        <img src="../assets/img/refresh.png" width="30" height="30" style="background-color:transparent;" alt="" srcset="">
-                    </button>
-                    <button id="update_prompt" class="update_prompt_btn_">Update</button>
-                </div>
-            </div>
-
-            <div id="scene_2" class="generated_scenes_">
-                <div class="scene_ids_">Scene1</div>
-                <div class="scene_prompt_">
-                    <textarea class="scene_prompt_textarea" name="scene_output_1" id="scene_output_1" cols="30">
-Once we get the prompts, we will save it into google sheets, you're BG  friend will look into them and select the best scenes. Than he will copy & paste then text-to-image or video prompts to generate the  content.
-                    </textarea>
-                </div>
-                <div class="scenes_controls_">
-                    <button type="button" class="refresh_prompt_btn_">
-                        <img src="../assets/img/refresh.png" width="30" height="30" style="background-color:transparent;" alt="" srcset="">
-                    </button>
-                    <button id="update_prompt" class="update_prompt_btn_">Update</button>
-                </div>
-            </div>
-        </div>
-        
         <div class="page_controls_container" style="position: absolute;bottom: 10px;">
             <button onclick="history.back();" class="page_control_" id="back_">
                 Back
@@ -118,42 +31,150 @@ Once we get the prompts, we will save it into google sheets, you're BG  friend w
                 Generate Audio
             </button>
         </div>
-        
+
     </div>
 
     <script type="module">
-        import { generate_scenes } from './scripts/scenes.js';
-    
+        import { generate_scenes, refresh_scene, update_scene } from './scripts/scenes.js';
+
+        const ai_generated_scenes = document.getElementById("AI_generated_scenes");
+        let test_scenes = null;
+
+
         window.addEventListener('DOMContentLoaded', async () => {
             const story_data = JSON.parse(localStorage.getItem('story_data'));
-    
+
             if (story_data) {
                 console.log('Received data:', story_data);
-                const scenes = await generate_scenes(story_data.prompt, story_data.duration);
-                console.log('Scenes:', scenes);
+                test_scenes = await generate_scenes(story_data.prompt, story_data.duration);
+                console.log('Scenes:', test_scenes);
+
+                test_scenes.scenes.forEach((scene, index) => {
+                const sceneId = scene.scene_id;
+                const storyId = test_scenes.story_id;
+
+                // Generate the HTML
+                const elem_html = `
+                    <div id="scene_${sceneId}" class="generated_scenes_ loading_state_">
+                    <div class="loading_overlay_full_">
+                        <div class="shimmer_"></div>
+                        <div class="spinner_circle"></div>
+                    </div>
+
+                    <div class="scene_content_" style="display: none;height: 200px;">
+                        <div class="scene_ids_">Scene${index + 1}</div>
+                        <div class="scene_prompt_">
+                        <textarea class="scene_prompt_textarea" name="scene_output_${sceneId}" id="scene_output_${sceneId}" cols="30"></textarea>
+                        </div>
+                        <div class="scenes_controls_">
+                        <button type="button" class="refresh_prompt_btn_" data-story-id="${storyId}" data-scene-id="${sceneId}">
+                            <img src="../assets/img/refresh.png" width="30" height="30" alt="">
+                        </button>
+                        <button class="update_prompt_btn_" data-story-id="${storyId}" data-scene-id="${sceneId}">Update</button>
+                        </div>
+                        <input type="hidden" id="hidden_image_prompt_${sceneId}" data-story-id="${storyId}"  data-scene-id="${sceneId}">
+                    </div>
+                    </div>
+                `;
+
+                // Append to container
+                ai_generated_scenes.insertAdjacentHTML('beforeend', elem_html);
+
+                // Simulate individual loading per scene
+                const delay = Math.floor(Math.random() * 4000) + 1000; // 1s - 5s
+                setTimeout(() => {
+                    const container = document.getElementById(`scene_${sceneId}`);
+                    const overlay = container.querySelector('.loading_overlay_full_');
+                    const content = container.querySelector('.scene_content_');
+
+                    // Hide shimmer
+                    overlay.style.opacity = 0;
+                    overlay.style.pointerEvents = 'none';
+
+                    // Add fade-in effect
+                    content.style.display = 'block';
+                    setTimeout(() => {
+                        content.classList.add('fade_in_show_');
+                    }, 50); // slight delay to ensure transition
+
+                    // Fill content
+                    container.querySelector(`#scene_output_${sceneId}`).value = scene.scene;
+                    container.querySelector(`#hidden_image_prompt_${sceneId}`).value = scene.imagePrompt;
+                }, delay);
+
+                });
             }
-        });
 
-        function generate_audio_page() {
-            window.location.href = 'generate_audio.html';
-        }
+            async function handleRefreshClick(event) {
+                const btn = event.currentTarget;
+                const sceneId = btn.getAttribute('data-scene-id');
+                const story_id = btn.getAttribute('data-story-id');
+                const container = document.getElementById(`scene_${sceneId}`);
+                const overlay = container.querySelector('.loading_overlay_full_');
+                const content = container.querySelector('.scene_content_');
+                const textarea = container.querySelector(`#scene_output_${sceneId}`);
+                const hiddenInput = container.querySelector(`#hidden_image_prompt_${sceneId}`);
 
-        function go_back() {
-            history.back();
-        }
-    </script>
-    
-    <!-- <script type="module" src="scripts/scenes.js">
-        import { generate_scenes } from './scenes.js';
+                const old_response = textarea.value;
+                textarea.value = "";
 
-        window.addEventListener('DOMContentLoaded', async () => {
-            const story_data = JSON.parse(localStorage.getItem('story_data'));
+                overlay.style.opacity = 1;
+                overlay.style.pointerEvents = 'all';
+                content.classList.remove('fade_in_show_');
 
-            if (story_data) {
-                console.log('Received data:', story_data);
+                console.log(story_id, sceneId);
+                const ref_scene = await refresh_scene(story_id, sceneId);
                 
-                const scenes = await generate_scenes(story_data.prompt, story_data.duration);
-                console.log('Scenes:', scenes);
+                setTimeout(() => {
+                    if (!ref_scene) {
+                        alert("Failed to refresh scene. Please try again.");
+                        console.error('Failed to refresh scene');
+                        textarea.value = old_response;
+                    } else {
+                        textarea.value = ref_scene.scene;
+                        hiddenInput.value = ref_scene.imagePrompt;
+                    }
+                    overlay.style.opacity = 0;
+                    overlay.style.pointerEvents = 'none';
+
+                    setTimeout(() => { content.classList.add('fade_in_show_') }, 50);
+                }, 1500 + Math.random() * 1000); 
+            }
+
+
+            async function updateStoryScene(event) {
+                const btn = event.currentTarget;
+                const sceneId = btn.getAttribute('data-scene-id');
+                const story_id = btn.getAttribute('data-story-id');
+                const container = document.getElementById(`scene_${sceneId}`);
+                const overlay = container.querySelector('.loading_overlay_full_');
+                const content = container.querySelector('.scene_content_');
+                const textarea = container.querySelector(`#scene_output_${sceneId}`);
+                const hiddenInput = container.querySelector(`#hidden_image_prompt_${sceneId}`);
+
+                const new_scene_input = textarea.value;
+
+                overlay.style.opacity = 1;
+                overlay.style.pointerEvents = 'all';
+                content.classList.remove('fade_in_show_');
+
+                console.log(story_id, sceneId);
+                const ref_scene = await update_scene(story_id, sceneId, new_scene_input);
+                
+                setTimeout(() => {
+                    if (!ref_scene) {
+                        alert("Failed to refresh scene. Please try again.");
+                        console.error('Failed to refresh scene');
+                        // textarea.value = old_response;
+                    } else {
+                        textarea.value = ref_scene.scene;
+                        hiddenInput.value = ref_scene.imagePrompt;
+                    }
+                    overlay.style.opacity = 0;
+                    overlay.style.pointerEvents = 'none';
+
+                    setTimeout(() => { content.classList.add('fade_in_show_') }, 50);
+                }, 1500 + Math.random() * 1000); 
             }
 
             function generate_audio_page() {
@@ -163,9 +184,19 @@ Once we get the prompts, we will save it into google sheets, you're BG  friend w
             function go_back() {
                 history.back();
             }
+            
+            document.querySelectorAll('.refresh_prompt_btn_').forEach(btn => {
+                btn.addEventListener('click', handleRefreshClick);
+            });
+
+            document.querySelectorAll('.update_prompt_btn_').forEach(btn => {
+                btn.addEventListener('click', updateStoryScene);
+            });
         });
 
+    </script>
 
-    </script> -->
+
 </body>
+
 </html>
