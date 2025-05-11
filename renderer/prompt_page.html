@@ -56,26 +56,35 @@
     <script>
 
         const durtion = document.getElementById("video_length_input_select")
-        const story_input = document.getElementById("story_input")
+        const story_input = document.getElementById("story_input");
+        const video_resolution = document.getElementById("Video_Resolution_input_select")
         
         function verify_inputs() {
             let durationValue = durtion.value;
             let story_prompt = story_input.value;
-            if (durationValue && story_prompt) {
+            let video_res = video_resolution.value
+            if (durationValue && story_prompt && video_res) {
                 console.log(`Prompt: ${story_prompt}  Duration: ${durationValue}`)
-                return story_prompt, durationValue
+                return story_prompt, durationValue, video_res
             }
             else {
-                alert(!durationValue? "Please select the duration of video" : "Please share your story idea...");
+                alert(!story_prompt? "Please share your story idea..." : !durationValue? "Please select the duration of video" : !video_res? "Please select the video resolution": "" );
                 return false;
             }
         }
             
         document.getElementById('next_').addEventListener('click', () => {
-            if (verify_inputs()){
+            let varified_inputs = verify_inputs()
+            if (varified_inputs){
+
+                localStorage.setItem('story_data', JSON.stringify({
+                    prompt: varified_inputs[0],
+                    video_dur: varified_inputs[1],
+                    video_res: varified_inputs[2]
+                }));
+                
                 window.location.href = 'story_scenes.html';
-            }
-            
+            }  
         });
 
         function go_back(){
