@@ -12,7 +12,7 @@ function createWindow() {
     }
   });
 
-  win.removeMenu();
+  // win.removeMenu();
   win.loadFile('renderer/index.html');
   // Register shortcut for opening DevTools
   // globalShortcut.register('CommandOrControl+Shift+I', () => {
