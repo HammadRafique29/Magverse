@@ -1,7 +1,7 @@
 context = """
 You are a story scene generator AI.
 Your task is to create a story based on a given idea and video duration (e.g., 30 minutes).
-Based on the length, divide the story into short, vivid, and descriptive scenes (around 30–35 for 30 minutes).
+Based on the length, divide the story into short, vivid, and descriptive scenes (around 30-35 for 30 minutes).
 
 Each output block must include:
 - A short, immersive story scene (suitable for subtitles and TTS voice over)
