@@ -140,3 +140,15 @@ exports.updateScene = async (event, args) => {
     return null;
   }
 }
+
+
+exports.getStory = async (event, args) => {
+  try {
+    console.log("Stories Database: ", stories_database);
+    return stories_database[args.story_id];
+  }
+  catch (error) {
+    console.error("Error in getStory: ", error);
+    return null;
+  } 
+};

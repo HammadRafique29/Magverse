@@ -75,6 +75,9 @@
         const generateText = document.getElementById("generate_text");
         let is_audios_genereted = false;
 
+        const story_data = JSON.parse(localStorage.getItem('story_data'));
+        console.log(story_data);
+
         function open_upload_popup() {
             if (is_audios_genereted) go_next();
             else {

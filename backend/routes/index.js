@@ -5,4 +5,5 @@ module.exports = function setupRoutes(ipcMain) {
   ipcMain.handle('example:generateScenes', exampleRoute.generateScenes);
   ipcMain.handle('example:refreshScene', exampleRoute.refreshScene);
   ipcMain.handle('example:updateScene', exampleRoute.updateScene);
+  ipcMain.handle('example:getStory', exampleRoute.getStory);
 };

@@ -21,13 +21,14 @@
         </div>
 
         <div id="AI_generated_scenes"></div>
+        <input type="text" name="hidden_" id="hidden_story_id_" style="display: none;">
             
 
         <div class="page_controls_container" style="position: absolute;bottom: 10px;">
             <button onclick="history.back();" class="page_control_" id="back_">
                 Back
             </button>
-            <button onclick="generate_audio_page()" class="page_control_" id="next_">
+            <button class="page_control_" id="next_">
                 Generate Audio
             </button>
         </div>
@@ -35,27 +36,47 @@
     </div>
 
     <script type="module">
-        import { generate_scenes, refresh_scene, update_scene } from './scripts/scenes.js';
+
+        import { generate_scenes, refresh_scene, update_scene, get_story } from './scripts/scenes.js';
 
         const ai_generated_scenes = document.getElementById("AI_generated_scenes");
-        let test_scenes = null;
+        const hidden_story_id_ = document.getElementById("hidden_story_id_");
 
+        
 
         window.addEventListener('DOMContentLoaded', async () => {
             const story_data = JSON.parse(localStorage.getItem('story_data'));
+            console.log(story_data);
+
+            let test_scenes = null;
+            const draft_story = JSON.parse(localStorage.getItem('story_data'));
+            console.log(draft_story);
+            test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generate_scenes(story_data.prompt, story_data.duration);
 
             if (story_data) {
-                console.log('Received data:', story_data);
-                test_scenes = await generate_scenes(story_data.prompt, story_data.duration);
-                console.log('Scenes:', test_scenes);
 
-                test_scenes.scenes.forEach((scene, index) => {
-                const sceneId = scene.scene_id;
-                const storyId = test_scenes.story_id;
+                test_scenes.scenes.forEach((scene, index) => renderSceneCard(scene, index, test_scenes.story_id));
 
-                // Generate the HTML
-                const elem_html = `
-                    <div id="scene_${sceneId}" class="generated_scenes_ loading_state_">
+                // Attach event listeners once DOM is populated
+                ai_generated_scenes.addEventListener('click', async (event) => {
+                    const target = event.target.closest('button');
+                    if (!target) return;
+
+                    if (target.classList.contains('refresh_prompt_btn_')) {
+                        await handleSceneInteraction(target, true);
+                    } else if (target.classList.contains('update_prompt_btn_')) {
+                        await handleSceneInteraction(target, false);
+                    }
+                });
+
+                document.getElementById("next_").addEventListener('click', async (event) => { await generate_audio_page() });
+            }
+
+            function renderSceneCard(scene, index, storyId) {
+            const { scene_id: sceneId, scene: sceneText, imagePrompt } = scene;
+
+            const elem_html = `
+                <div id="scene_${sceneId}" class="generated_scenes_ loading_state_">
                     <div class="loading_overlay_full_">
                         <div class="shimmer_"></div>
                         <div class="spinner_circle"></div>
@@ -64,135 +85,109 @@
                     <div class="scene_content_" style="display: none;height: 200px;">
                         <div class="scene_ids_">Scene${index + 1}</div>
                         <div class="scene_prompt_">
-                        <textarea class="scene_prompt_textarea" name="scene_output_${sceneId}" id="scene_output_${sceneId}" cols="30"></textarea>
+                            <textarea class="scene_prompt_textarea" name="scene_output_${sceneId}" id="scene_output_${sceneId}" cols="30"></textarea>
                         </div>
                         <div class="scenes_controls_">
-                        <button type="button" class="refresh_prompt_btn_" data-story-id="${storyId}" data-scene-id="${sceneId}">
-                            <img src="../assets/img/refresh.png" width="30" height="30" alt="">
-                        </button>
-                        <button class="update_prompt_btn_" data-story-id="${storyId}" data-scene-id="${sceneId}">Update</button>
+                            <button type="button" class="refresh_prompt_btn_" data-story-id="${storyId}" data-scene-id="${sceneId}">
+                                <img src="../assets/img/refresh.png" width="30" height="30" alt="">
+                            </button>
+                            <button class="update_prompt_btn_" data-story-id="${storyId}" data-scene-id="${sceneId}">Update</button>
                         </div>
-                        <input type="hidden" id="hidden_image_prompt_${sceneId}" data-story-id="${storyId}"  data-scene-id="${sceneId}">
+                        <input type="hidden" id="hidden_image_prompt_${sceneId}" data-story-id="${storyId}" data-scene-id="${sceneId}">
                     </div>
-                    </div>
-                `;
+                </div>
+            `;
 
-                // Append to container
-                ai_generated_scenes.insertAdjacentHTML('beforeend', elem_html);
+            ai_generated_scenes.insertAdjacentHTML('beforeend', elem_html);
+            const delay = Math.floor(Math.random() * 4000) + 1000;
+            hidden_story_id_.value = storyId;
+            setTimeout(() => populateSceneContent(sceneId, sceneText, imagePrompt), delay);
+            }
 
-                // Simulate individual loading per scene
-                const delay = Math.floor(Math.random() * 4000) + 1000; // 1s - 5s
-                setTimeout(() => {
-                    const container = document.getElementById(`scene_${sceneId}`);
-                    const overlay = container.querySelector('.loading_overlay_full_');
-                    const content = container.querySelector('.scene_content_');
+            function populateSceneContent(sceneId, sceneText, imagePrompt) {
+                const container = document.getElementById(`scene_${sceneId}`);
+                const overlay = container.querySelector('.loading_overlay_full_');
+                const content = container.querySelector('.scene_content_');
 
-                    // Hide shimmer
-                    overlay.style.opacity = 0;
-                    overlay.style.pointerEvents = 'none';
+                container.querySelector(`#scene_output_${sceneId}`).value = sceneText;
+                container.querySelector(`#hidden_image_prompt_${sceneId}`).value = imagePrompt;
 
-                    // Add fade-in effect
-                    content.style.display = 'block';
+                overlay.style.opacity = 0;
+                overlay.style.pointerEvents = 'none';
+
+                content.style.display = 'block';
+                setTimeout(() => content.classList.add('fade_in_show_'), 50);
+            }
+
+
+            async function handleSceneInteraction(button, isRefresh) {
+                const sceneId = button.getAttribute('data-scene-id');
+                const storyId = button.getAttribute('data-story-id');
+                const container = document.getElementById(`scene_${sceneId}`);
+                const overlay = container.querySelector('.loading_overlay_full_');
+                const content = container.querySelector('.scene_content_');
+                const textarea = container.querySelector(`#scene_output_${sceneId}`);
+                const hiddenInput = container.querySelector(`#hidden_image_prompt_${sceneId}`);
+
+                const originalValue = textarea.value;
+                if (isRefresh) textarea.value = "";
+                showOverlay(overlay, content);
+
+                try {
+                    const response = isRefresh
+                        ? await refresh_scene(storyId, sceneId)
+                        : await update_scene(storyId, sceneId, textarea.value);
+
                     setTimeout(() => {
-                        content.classList.add('fade_in_show_');
-                    }, 50); // slight delay to ensure transition
-
-                    // Fill content
-                    container.querySelector(`#scene_output_${sceneId}`).value = scene.scene;
-                    container.querySelector(`#hidden_image_prompt_${sceneId}`).value = scene.imagePrompt;
-                }, delay);
-
-                });
+                        if (!response) {
+                            alert(`Failed to ${isRefresh ? "refresh" : "update"} scene. Please try again.`);
+                            console.error(`Failed to ${isRefresh ? "refresh" : "update"} scene`);
+                            if (isRefresh) textarea.value = originalValue;
+                        } else {
+                            textarea.value = response.scene;
+                            hiddenInput.value = response.imagePrompt;
+                        }
+                        hideOverlay(overlay, content);
+                    }, 1500 + Math.random() * 1000);
+                } catch (err) {
+                    console.error(err);
+                    hideOverlay(overlay, content);
+                }
             }
 
-            async function handleRefreshClick(event) {
-                const btn = event.currentTarget;
-                const sceneId = btn.getAttribute('data-scene-id');
-                const story_id = btn.getAttribute('data-story-id');
-                const container = document.getElementById(`scene_${sceneId}`);
-                const overlay = container.querySelector('.loading_overlay_full_');
-                const content = container.querySelector('.scene_content_');
-                const textarea = container.querySelector(`#scene_output_${sceneId}`);
-                const hiddenInput = container.querySelector(`#hidden_image_prompt_${sceneId}`);
-
-                const old_response = textarea.value;
-                textarea.value = "";
-
+            function showOverlay(overlay, content) {
                 overlay.style.opacity = 1;
                 overlay.style.pointerEvents = 'all';
                 content.classList.remove('fade_in_show_');
-
-                console.log(story_id, sceneId);
-                const ref_scene = await refresh_scene(story_id, sceneId);
-                
-                setTimeout(() => {
-                    if (!ref_scene) {
-                        alert("Failed to refresh scene. Please try again.");
-                        console.error('Failed to refresh scene');
-                        textarea.value = old_response;
-                    } else {
-                        textarea.value = ref_scene.scene;
-                        hiddenInput.value = ref_scene.imagePrompt;
-                    }
-                    overlay.style.opacity = 0;
-                    overlay.style.pointerEvents = 'none';
-
-                    setTimeout(() => { content.classList.add('fade_in_show_') }, 50);
-                }, 1500 + Math.random() * 1000); 
             }
 
-
-            async function updateStoryScene(event) {
-                const btn = event.currentTarget;
-                const sceneId = btn.getAttribute('data-scene-id');
-                const story_id = btn.getAttribute('data-story-id');
-                const container = document.getElementById(`scene_${sceneId}`);
-                const overlay = container.querySelector('.loading_overlay_full_');
-                const content = container.querySelector('.scene_content_');
-                const textarea = container.querySelector(`#scene_output_${sceneId}`);
-                const hiddenInput = container.querySelector(`#hidden_image_prompt_${sceneId}`);
-
-                const new_scene_input = textarea.value;
-
-                overlay.style.opacity = 1;
-                overlay.style.pointerEvents = 'all';
-                content.classList.remove('fade_in_show_');
-
-                console.log(story_id, sceneId);
-                const ref_scene = await update_scene(story_id, sceneId, new_scene_input);
-                
-                setTimeout(() => {
-                    if (!ref_scene) {
-                        alert("Failed to refresh scene. Please try again.");
-                        console.error('Failed to refresh scene');
-                        // textarea.value = old_response;
-                    } else {
-                        textarea.value = ref_scene.scene;
-                        hiddenInput.value = ref_scene.imagePrompt;
-                    }
-                    overlay.style.opacity = 0;
-                    overlay.style.pointerEvents = 'none';
-
-                    setTimeout(() => { content.classList.add('fade_in_show_') }, 50);
-                }, 1500 + Math.random() * 1000); 
+            function hideOverlay(overlay, content) {
+                overlay.style.opacity = 0;
+                overlay.style.pointerEvents = 'none';
+                setTimeout(() => content.classList.add('fade_in_show_'), 50);
             }
 
-            function generate_audio_page() {
+            async function generate_audio_page() {
+
+                const updated_story_data = await get_story(hidden_story_id_.value);
+                localStorage.setItem('story_data', JSON.stringify({
+                        prompt: story_data.prompt,
+                        video_dur: story_data.video_dur,
+                        video_res: story_data.video_res,
+                        story_id: hidden_story_id_.value,
+                        draft_story: updated_story_data,
+                    }));
+
                 window.location.href = 'generate_audio.html';
             }
 
             function go_back() {
                 history.back();
             }
-            
-            document.querySelectorAll('.refresh_prompt_btn_').forEach(btn => {
-                btn.addEventListener('click', handleRefreshClick);
-            });
 
-            document.querySelectorAll('.update_prompt_btn_').forEach(btn => {
-                btn.addEventListener('click', updateStoryScene);
-            });
         });
+
+        
 
     </script>
 
