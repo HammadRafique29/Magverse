@@ -120,14 +120,52 @@ Once we get the prompts, we will save it into google sheets, you're BG  friend w
         </div>
         
     </div>
-    <script type="module" src="scripts/index.js"></script>
-    <script>
-        function generate_audio_page(){
+
+    <script type="module">
+        import { generate_scenes } from './scripts/scenes.js';
+    
+        window.addEventListener('DOMContentLoaded', async () => {
+            const story_data = JSON.parse(localStorage.getItem('story_data'));
+    
+            if (story_data) {
+                console.log('Received data:', story_data);
+                const scenes = await generate_scenes(story_data.prompt, story_data.duration);
+                console.log('Scenes:', scenes);
+            }
+        });
+
+        function generate_audio_page() {
             window.location.href = 'generate_audio.html';
         }
-        function go_back(){
+
+        function go_back() {
             history.back();
         }
     </script>
+    
+    <!-- <script type="module" src="scripts/scenes.js">
+        import { generate_scenes } from './scenes.js';
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const story_data = JSON.parse(localStorage.getItem('story_data'));
+
+            if (story_data) {
+                console.log('Received data:', story_data);
+                
+                const scenes = await generate_scenes(story_data.prompt, story_data.duration);
+                console.log('Scenes:', scenes);
+            }
+
+            function generate_audio_page() {
+                window.location.href = 'generate_audio.html';
+            }
+
+            function go_back() {
+                history.back();
+            }
+        });
+
+
+    </script> -->
 </body>
 </html>

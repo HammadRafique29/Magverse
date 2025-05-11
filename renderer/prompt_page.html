@@ -65,7 +65,11 @@
             let video_res = video_resolution.value
             if (durationValue && story_prompt && video_res) {
                 console.log(`Prompt: ${story_prompt}  Duration: ${durationValue}`)
-                return story_prompt, durationValue, video_res
+                return {
+                    prompt: story_prompt,
+                    duration: durationValue,
+                    resolution: video_res
+                };
             }
             else {
                 alert(!story_prompt? "Please share your story idea..." : !durationValue? "Please select the duration of video" : !video_res? "Please select the video resolution": "" );
@@ -74,15 +78,15 @@
         }
             
         document.getElementById('next_').addEventListener('click', () => {
-            let varified_inputs = verify_inputs()
+            let varified_inputs = verify_inputs();
+            console.log(varified_inputs)
             if (varified_inputs){
 
                 localStorage.setItem('story_data', JSON.stringify({
-                    prompt: varified_inputs[0],
-                    video_dur: varified_inputs[1],
-                    video_res: varified_inputs[2]
+                    prompt: varified_inputs.prompt,
+                    video_dur: varified_inputs.duration,
+                    video_res: varified_inputs.resolution
                 }));
-                
                 window.location.href = 'story_scenes.html';
             }  
         });
