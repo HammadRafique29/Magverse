@@ -17,3 +17,8 @@ export async function updateScene(story_id, scene_id, new_scene) {
 export async function getStory(story_id) {
   return await window.api.call('example:getStory', { story_id });
 }
+
+export async function transcribeScene(story_id, scene_id) {
+  return await window.api.call('example:transcribeScene', { story_id, scene_id });
+}
+
