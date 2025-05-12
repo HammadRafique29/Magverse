@@ -67,7 +67,8 @@
     
     <script type="module" src="scripts/index.js"></script>
 
-    <script>
+    <script type="module">
+        import { transcribe_scene } from './scripts/audio.js';
 
         const audio_input = document.getElementById("speaker_file_picker");
         const upload_popup = document.getElementById("upload_audio");
@@ -75,7 +76,7 @@
         const generateText = document.getElementById("generate_text");
         let is_audios_genereted = false;
 
-        const story_data = JSON.parse(localStorage.getItem('story_data'));
+        let story_data = JSON.parse(localStorage.getItem('story_data'));
         console.log(story_data);
 
         function open_upload_popup() {
@@ -120,6 +121,13 @@
             
         }
 
+        function transcribe_audios() {
+            story_data.scenes.forEach((scene, index) => {
+                const { scene_id: sceneId, scene: sceneText, imagePrompt } = scene;
+                const audioFilePath = `audio/${sceneId}.wav`;
+                transcribe_scene(audioFilePath, sceneText, index);
+            });
+        }
         function go_next() {
             window.location.href = 'image_render.html';
         }
