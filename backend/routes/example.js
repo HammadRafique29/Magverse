@@ -1,154 +1,99 @@
 
+const ollama_model = require('../scripts/ollama_');
+
+
 let stories_database = {};
 
-
-exports.getMessage = async (event, args) => {
-    return { msg: `Hello from the backend! Received: ${args.name}` };
-};
-  
-exports.generateScenes = async (event, args) => {
-  let scenes = `
-  Morning mist curled around the roots of ancient trees as a young girl named Elara wandered deeper into the heart of the forest, drawn by a melody only she could hear. (a young girl walking through a misty magical forest with ancient trees and soft morning light)
-
-  A fox with silver fur and wise eyes appeared before her, motioning with its head as if to say, “Follow me.” (a silver-furred fox with glowing eyes standing on a forest path, early sunlight streaming through the trees)
-
-  They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air. (a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky)
-
-  At the center stood a hollow tree with a spiral staircase leading deep underground, its bark carved with glowing runes. (an ancient hollow tree with glowing runes and a spiral staircase descending inside)
-
-  Elara hesitated, then stepped into the tree, her heart pounding as the air shimmered around her. (a girl entering a glowing tree with a magical aura, the inside illuminated by mysterious light)`;
-
-  // Split, clean, and transform the scenes
-  const result = scenes
-    .split('\n')                     // Split into lines
-    .map(line => line.trim())        // Trim whitespace
-    .filter(line => line.length > 0) // Remove empty lines
+// Helper function to parse scenes text.
+// getSceneId is a function that returns the scene_id for each parsed scene.
+function parseScenes(text, getSceneId) {
+  return text
+    .split("\n")
+    .map(line => line.trim())
+    .filter(Boolean)
     .map(line => {
       const match = line.match(/^(.*?)\s*\((.*?)\)$/);
       if (match) {
-        const scene = match[1].trim();
-        const imagePrompt = match[2].trim();
-        return {scene: scene, imagePrompt: imagePrompt, scene_id: Math.floor(Math.random() * 99999)};
+        return {
+          scene: match[1].trim(),
+          imagePrompt: match[2].trim(),
+          scene_id: getSceneId()
+        };
       }
       return null;
     })
-    .filter(item => item !== null); // Remove any non-matching lines (just in case)
-    
-    const story_id = Math.floor(Math.random() * 99999);
-    stories_database[story_id] = { scenes: result, story_id: story_id };
-    return { scenes: result, story_id: story_id };
+    .filter(Boolean);
+}
+
+
+
+exports.getMessage = async (event, args) => {
+  return { msg: `Hello from the backend! Received: ${args.name}` };
 };
 
 
- 
+
+exports.generateScenes = async (event, args) => {
+  console.log("Generating scenes with args:", args);
+  const scenes = await ollama_model.generate_scenes();
+  const result = parseScenes(scenes, () => Math.floor(Math.random() * 99999));
+  const story_id = Math.floor(Math.random() * 99999);
+  stories_database[story_id] = { scenes: result, story_id };
+  return { scenes: result, story_id };
+};
+
+
+
 exports.refreshScene = async (event, args) => {
+  const { story_id, scene_id } = args;
 
-  const story_id = args.story_id;
-  const scene_id = args.scene_id;
-  let target_scene = null;
-  let target_scene_index = null;
-
-  let temp_index = -1;
-
-  try {
-    console.log(stories_database, story_id, scene_id);
-    stories_database[`${story_id}`]["scenes"].some((scene, i) => {
-        if (scene.scene_id == scene_id) {
-            target_scene = scene;
-            temp_index = i; // Store the index
-            return true; // Stop iteration
-        }
-        return false;
-    });
-
-
-    console.log("Target Scene: ", target_scene);
-    if (!target_scene) {
-        console.log("Scene not found");
-        return null;
-    }
-
-    let refresh_scene = `Testing! Morning mist curled around the roots of ancient trees as a young girl named Elara wandered deeper into the heart of the forest, drawn by a melody only she could hear. (Testing! a young girl walking through a misty magical forest with ancient trees and soft morning light)`;
-
-    // Split, clean, and transform the scenes
-    const result = refresh_scene
-      .split('\n') 
-      .map(line => line.trim())      
-      .filter(line => line.length > 0)
-      .map(line => {
-        const match = line.match(/^(.*?)\s*\((.*?)\)$/);
-        if (match) {
-          const scene = match[1].trim();
-          const imagePrompt = match[2].trim();
-          return {scene: scene, imagePrompt: imagePrompt, scene_id: target_scene.scene_id};
-        }
-        return null;
-      })
-      .filter(item => item !== null);
-
-    stories_database[story_id]['scenes'][temp_index] = result[0]; // Update the Stories Database
-    console.log("Final Database Results: ", stories_database[story_id]['scenes'][temp_index]);
-    return result[0];
-    
-  } catch (error) {
-      console.error("Error in refreshScene: ", error);
-      return null
+  if (!stories_database[story_id]) {
+    console.log("Story not found");
+    return null;
   }
-  
+  const scenesArray = stories_database[story_id].scenes;
+  const index = scenesArray.findIndex(scene => scene.scene_id == scene_id);
+  if (index === -1) {
+    console.log("Scene not found");
+    return null;
+  }
+  // Retain the original scene_id.
+  const target_scene = scenesArray[index];
+  const refresh_scene_text = `Testing! Morning mist curled around the roots of ancient trees as a young girl named Elara wandered deeper into the heart of the forest, drawn by a melody only she could hear. (Testing! a young girl walking through a misty magical forest with ancient trees and soft morning light)`;
+
+  const updatedScene = parseScenes(refresh_scene_text, () => target_scene.scene_id)[0];
+  stories_database[story_id].scenes[index] = updatedScene;
+  return updatedScene;
 };
 
 
 
 exports.updateScene = async (event, args) => {
-  const story_id = args.story_id;
-  const scene_id = args.scene_id;
-  const new_scene = args.new_scene;
+  const { story_id, scene_id, new_scene } = args;
 
-  let target_scene = null;
-  let temp_index = -1;
-
-  try {
-
-    console.log(stories_database, story_id, scene_id);
-    stories_database[`${story_id}`]["scenes"].some((scene, i) => {
-        if (scene.scene_id == scene_id) {
-            target_scene = scene;
-            temp_index = i; 
-            return true; 
-        }
-        return false;
-    });
-
-    console.log("Update Scene: ", target_scene);
-    if (!target_scene) {
-        console.log("Scene not found");
-        return null;
-    }
-
-    const result = {
-      scene: new_scene,
-      imagePrompt: "Testing Prompt",
-      scene_id: target_scene.scene_id
-    }
-    
-    stories_database[story_id]['scenes'][temp_index] = result; // Update the Stories Database
-    console.log("Final Updating Database Results: ", stories_database[story_id]['scenes'][temp_index]);
-    return result;
-
-  } catch (error) {
-    console.error("Error in updateScene: ", error);
+  if (!stories_database[story_id]) {
+    console.log("Story not found");
     return null;
   }
-}
+
+  const scenesArray = stories_database[story_id].scenes;
+  const index = scenesArray.findIndex(scene => scene.scene_id == scene_id);
+  if (index === -1) {
+    console.log("Scene not found");
+    return null;
+  }
+
+  const updatedScene = {
+    scene: new_scene,
+    imagePrompt: "Testing Prompt",
+    scene_id: scenesArray[index].scene_id
+  };
+
+  stories_database[story_id].scenes[index] = updatedScene;
+  return updatedScene;
+};
 
 
 exports.getStory = async (event, args) => {
-  try {
-    console.log("Stories Database: ", stories_database);
-    return stories_database[args.story_id];
-  }
-  catch (error) {
-    console.error("Error in getStory: ", error);
-    return null;
-  } 
+  return stories_database[args.story_id] || null;
 };
