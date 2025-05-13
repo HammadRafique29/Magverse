@@ -50,7 +50,7 @@
             </p>
     
             <div class="button-container">
-                <button onclick="go_back()" class="page_control_" id="back_">
+                <button onclick="history.back()" class="page_control_" id="back_">
                     Back
                 </button>
     
@@ -130,9 +130,6 @@
         }
         function go_next() {
             window.location.href = 'image_render.html';
-        }
-        function go_back() {
-            history.back()
         }
     </script>
 </body>
