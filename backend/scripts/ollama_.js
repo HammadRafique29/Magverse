@@ -129,7 +129,7 @@ A shadowy figure watched from the edge of a stone bridge, its eyes glowing faint
         const bestModel = await selectBestModel(localModels);
         console.log("Best Model:", bestModel);
 
-        const res = await sendChatPrompt(bestModel, "Tell me a joke.", CONTEXT);
+        const res = await sendChatPrompt("tinyllama:latest", "Tell me a joke.", CONTEXT);
         console.log("Ollama Language Model Response: ", res);
         return temp_scenes;
         
