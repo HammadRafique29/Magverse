@@ -42,7 +42,17 @@
         const ai_generated_scenes = document.getElementById("AI_generated_scenes");
         const hidden_story_id_ = document.getElementById("hidden_story_id_");
 
-        
+        async function generate_ai_scenes() {
+
+            const story_data = JSON.parse(localStorage.getItem('story_data'));
+            console.log(story_data);
+
+            let test_scenes = null;
+            const draft_story = JSON.parse(localStorage.getItem('story_data'));
+            console.log(draft_story);
+            
+            test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generate_scenes(story_data.prompt, story_data.duration);
+        }
 
         window.addEventListener('DOMContentLoaded', async () => {
             const story_data = JSON.parse(localStorage.getItem('story_data'));
@@ -53,9 +63,9 @@
             console.log(draft_story);
             test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generate_scenes(story_data.prompt, story_data.duration);
 
-            if (story_data) {
+            if (story_data & test_scenes.scenes) {
 
-                test_scenes.scenes.forEach((scene, index) => renderSceneCard(scene, index, test_scenes.story_id));
+                test_scenes.scenes.forEach((scene, index) => renderSceneCard(scene, index, test_scenes.story_id, draft_story && draft_story.draft_story ? true : false, true));
 
                 // Attach event listeners once DOM is populated
                 ai_generated_scenes.addEventListener('click', async (event) => {
@@ -68,40 +78,56 @@
                         await handleSceneInteraction(target, false);
                     }
                 });
-
+                // const temp_scenes_obj = [
+                //     {scene_id: "1", scene: "Loading...", imagePrompt: "Loading..." },
+                //     {scene_id: "1", scene: "Loading...", imagePrompt: "Loading..." },
+                //     {scene_id: "1", scene: "Loading...", imagePrompt: "Loading..." },
+                //     {scene_id: "1", scene: "Loading...", imagePrompt: "Loading..." },
+                //     {scene_id: "1", scene: "Loading...", imagePrompt: "Loading..." },
+                //     {scene_id: "1", scene: "Loading...", imagePrompt: "Loading..." }
+                // ]
+                // temp_scenes_obj.forEach((scene, index) => renderSceneCard(scene, index, "12345678", false, true));
                 document.getElementById("next_").addEventListener('click', async (event) => { await generate_audio_page() });
             }
 
-            function renderSceneCard(scene, index, storyId) {
-            const { scene_id: sceneId, scene: sceneText, imagePrompt } = scene;
+            function renderSceneCard(scene, index, storyId, old_scene = false, isTempLoadingObj = false) {
+                const { scene_id: sceneId, scene: sceneText, imagePrompt } = scene;
 
-            const elem_html = `
-                <div id="scene_${sceneId}" class="generated_scenes_ loading_state_">
-                    <div class="loading_overlay_full_">
-                        <div class="shimmer_"></div>
-                        <div class="spinner_circle"></div>
-                    </div>
+                if (!isTempLoadingObj) {
+                    document.querySelectorAll('.temporary_loading_obj').forEach(el => {
+                        el.replaceWith(el.cloneNode(false));
+                        el.remove();
+                        el = null;
+                    });
+                }
 
-                    <div class="scene_content_" style="display: none;height: 200px;">
-                        <div class="scene_ids_">Scene${index + 1}</div>
-                        <div class="scene_prompt_">
-                            <textarea class="scene_prompt_textarea" name="scene_output_${sceneId}" id="scene_output_${sceneId}" cols="30"></textarea>
+                const elem_html = `
+                    <div id="scene_${sceneId}" class="generated_scenes_ loading_state_ ${isTempLoadingObj? 'temporary_loading_obj': ''}">
+                        <div class="loading_overlay_full_">
+                            <div class="shimmer_"></div>
+                            <div class="spinner_circle"></div>
                         </div>
-                        <div class="scenes_controls_">
-                            <button type="button" class="refresh_prompt_btn_" data-story-id="${storyId}" data-scene-id="${sceneId}">
-                                <img src="../assets/img/refresh.png" width="30" height="30" alt="">
-                            </button>
-                            <button class="update_prompt_btn_" data-story-id="${storyId}" data-scene-id="${sceneId}">Update</button>
-                        </div>
-                        <input type="hidden" id="hidden_image_prompt_${sceneId}" data-story-id="${storyId}" data-scene-id="${sceneId}">
-                    </div>
-                </div>
-            `;
 
-            ai_generated_scenes.insertAdjacentHTML('beforeend', elem_html);
-            const delay = Math.floor(Math.random() * 4000) + 1000;
-            hidden_story_id_.value = storyId;
-            setTimeout(() => populateSceneContent(sceneId, sceneText, imagePrompt), delay);
+                        <div class="scene_content_" style="display: none;height: 200px;">
+                            <div class="scene_ids_">Scene${index + 1}</div>
+                            <div class="scene_prompt_">
+                                <textarea class="scene_prompt_textarea" name="scene_output_${sceneId}" id="scene_output_${sceneId}" cols="30"></textarea>
+                            </div>
+                            <div class="scenes_controls_">
+                                <button type="button" class="refresh_prompt_btn_" data-story-id="${storyId}" data-scene-id="${sceneId}">
+                                    <img src="../assets/img/refresh.png" width="30" height="30" alt="">
+                                </button>
+                                <button class="update_prompt_btn_" data-story-id="${storyId}" data-scene-id="${sceneId}">Update</button>
+                            </div>
+                            <input type="hidden" id="hidden_image_prompt_${sceneId}" data-story-id="${storyId}" data-scene-id="${sceneId}">
+                        </div>
+                    </div>
+                `;
+
+                ai_generated_scenes.insertAdjacentHTML('beforeend', elem_html);
+                const delay =  Math.floor((!old_scene ? Math.random() : 0.02) * 4000 ) + 1000;
+                hidden_story_id_.value = storyId;
+                setTimeout(() => populateSceneContent(sceneId, sceneText, imagePrompt), delay);
             }
 
             function populateSceneContent(sceneId, sceneText, imagePrompt) {
