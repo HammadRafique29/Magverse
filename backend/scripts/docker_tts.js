@@ -2,49 +2,70 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-// Configuration
-const image = 'ghcr.io/coqui-ai/tts';
-const textToSpeak = 'Hello, this is a test.';
-const outputPath = path.resolve(__dirname, 'output.wav');
+/**
+ * Generate speech audio using Coqui TTS Docker container with speaker WAV.
+ * @param {string} text - Text to convert to speech.
+ * @param {string} speakerWavPath - Path to reference speaker .wav file.
+ * @returns {string} - Path to generated audio file or error message.
+ */
+function generateSpeechWithSpeaker(text, speakerWavPath) {
+  const image = 'ghcr.io/coqui-ai/tts';
+  const outputAudio = path.resolve(__dirname, 'output.wav');
 
-try {
-  // 1. Check if Docker is running
-  execSync('docker info', { stdio: 'ignore' });
-  console.log('✅ Docker is running');
+  try {
+    // Check Docker is running
+    execSync('docker info', { stdio: 'ignore' });
 
-  // 2. Check if image is available locally
-  const images = execSync(`docker images -q ${image}`).toString().trim();
-  if (!images) {
-    console.log(`⏳ Pulling image ${image}...`);
-    execSync(`docker pull ${image}`, { stdio: 'inherit' });
-  } else {
-    console.log(`✅ Image ${image} is available locally`);
+    // Check if image exists locally
+    const imageExists = execSync(`docker images -q ${image}`).toString().trim();
+    if (!imageExists) {
+      execSync(`docker pull ${image}`, { stdio: 'inherit' });
+    }
+
+    // Check speaker WAV file exists
+    if (!fs.existsSync(speakerWavPath)) {
+      return 'Error: Speaker WAV file does not exist.';
+    }
+
+    // Remove previous output
+    if (fs.existsSync(outputAudio)) {
+      fs.unlinkSync(outputAudio);
+    }
+
+    // Normalize paths for volume mount
+    const localDir = path.dirname(speakerWavPath);
+    const speakerFileName = path.basename(speakerWavPath);
+
+    // Build Docker command
+    const command = `
+      docker run --rm \
+        -v ${localDir}:/data \
+        ${image} \
+        --text "${text}" \
+        --speaker_wav /data/${speakerFileName} \
+        --out_path /data/output.wav
+    `;
+
+    // Run container
+    execSync(command, { stdio: 'inherit' });
+
+    const finalOutput = path.join(localDir, 'output.wav');
+    return fs.existsSync(finalOutput)
+      ? finalOutput
+      : 'Error: Output audio not created.';
+  } catch (err) {
+    return `Error: ${err.message}`;
   }
-
-  // 3. Ensure previous output is removed
-  if (fs.existsSync(outputPath)) {
-    fs.unlinkSync(outputPath);
-  }
-
-  // 4. Run Docker container to generate TTS audio
-  const runCommand = `
-    docker run --rm \
-      -v ${__dirname}:/data \
-      ${image} \
-      --text "${textToSpeak}" \
-      --out_path /data/output.wav
-  `;
-
-  console.log('▶️ Generating speech audio...');
-  execSync(runCommand, { stdio: 'inherit' });
-
-  // 5. Confirm output
-  if (fs.existsSync(outputPath)) {
-    console.log('✅ Audio generated successfully: output.wav');
-  } else {
-    console.error('❌ Failed to generate audio.');
-  }
-
-} catch (error) {
-  console.error('❌ Error:', error.message);
 }
+
+module.exports = { generateSpeechWithSpeaker };
+
+
+
+// const { generateSpeechWithSpeaker } = require('./generateSpeechWithSpeaker');
+
+// const text = 'This is my voice, generated with your speaker audio.';
+// const speakerAudioPath = '/absolute/path/to/your/speaker.wav'; // must be absolute
+
+// const result = generateSpeechWithSpeaker(text, speakerAudioPath);
+// console.log('Result:', result);
