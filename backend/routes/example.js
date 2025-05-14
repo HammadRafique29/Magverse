@@ -39,6 +39,7 @@ exports.generateScenes = async (event, args) => {
   const result = parseScenes(scenes, () => Math.floor(Math.random() * 99999));
   const story_id = Math.floor(Math.random() * 99999);
   stories_database[story_id] = { scenes: result, story_id };
+  console.log("Generated scenes:", result);
   return { scenes: result, story_id };
 };
 
