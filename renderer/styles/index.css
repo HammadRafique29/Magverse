@@ -119,12 +119,17 @@
   /* AI Generated Scenes */
   #AI_generated_scenes {
     width: 90%;
+    max-height: 70%;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
     column-gap: 50px;
     row-gap: 20px;
+    overflow-y: scroll;
+    margin-bottom: 20px;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
   }
 
   .generated_scenes_ {
