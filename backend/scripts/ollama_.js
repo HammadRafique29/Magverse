@@ -94,12 +94,7 @@ const temp_scenes = `
       
         Ollama Elara hesitated, then stepped into the tree, her heart pounding as the air shimmered around her. (a girl entering a glowing tree with a magical aura, the inside illuminated by mysterious light)
         
-        Ollama They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air. (a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky)
-      
-        Ollama At the center stood a hollow tree with a spiral staircase leading deep underground, its bark carved with glowing runes. (an ancient hollow tree with glowing runes and a spiral staircase descending inside)
-      
-        Ollama Elara hesitated, then stepped into the tree, her heart pounding as the air shimmered around her. (a girl entering a glowing tree with a magical aura, the inside illuminated by mysterious light)`;
-
+        Ollama They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air. (a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky)`;
 
 async function generate_scenes() {
     try {
@@ -121,16 +116,16 @@ She stepped into the glowing forest, where every tree shimmered with tiny orbs o
  
 A shadowy figure watched from the edge of a stone bridge, its eyes glowing faintly under the moonlight.  (a shadowy hooded figure standing on an old stone bridge under the moon)`
 
-        if (!await isOllamaRunning()) {
-            await startOllama();
-        }
+        // if (!await isOllamaRunning()) {
+        //     await startOllama();
+        // }
 
-        const localModels = await getLocalModels();
-        const bestModel = await selectBestModel(localModels);
-        console.log("Best Model:", bestModel);
+        // const localModels = await getLocalModels();
+        // const bestModel = await selectBestModel(localModels);   
+        // console.log("Best Model:", bestModel);
 
-        const res = await sendChatPrompt(bestModel, "Provde story of pandas of length 20 minute", CONTEXT);
-        console.log("Ollama Language Model Response: ", res);
+        // const res = await sendChatPrompt(bestModel, "Provde story of pandas of length 20 minute", CONTEXT);
+        // console.log("Ollama Language Model Response: ", res);
         return temp_scenes;
         
     } catch (err) {
