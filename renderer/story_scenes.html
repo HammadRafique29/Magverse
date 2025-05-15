@@ -17,7 +17,7 @@
 
     <div class="content" style="row-gap: 30px;align-items: center;justify-content: center;">
         <div id="message">
-            <p>We generated some Scenes for you</p>
+            <p>We're Generating Some Scenes For You</p>
         </div>
 
         <div id="AI_generated_scenes"></div>
@@ -28,8 +28,9 @@
             <button onclick="history.back();" class="page_control_" id="back_">
                 Back
             </button>
-            <button class="page_control_" id="next_">
-                Generate Audio
+            <button class="page_control_" style="background-color: rgb(90 43 141);" id="next_" class="flex-center">
+                <p id="generate_text">Generate Audio</p>
+                <div class="loader" id="loading_animation_2"></div>
             </button>
         </div>
 
@@ -41,6 +42,14 @@
 
         const ai_generated_scenes = document.getElementById("AI_generated_scenes");
         const hidden_story_id_ = document.getElementById("hidden_story_id_");
+        const loader2 = document.getElementById("loading_animation_2");
+        const generateText = document.getElementById("generate_text");
+        const next_page_btn = document.getElementById("next_");
+        const back_page_btn = document.getElementById("back_");
+
+        let isScenesFullyLoaded = false;
+        let audiosGeneratedList = [];
+        let totalScenesFound = 0;
 
         async function generate_ai_scenes() {
 
@@ -62,12 +71,14 @@
             const draft_story = JSON.parse(localStorage.getItem('story_data'));
             console.log(draft_story);
             test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generate_scenes(story_data.prompt, story_data.duration);
-
+            totalScenesFound = test_scenes.scenes.length;
+            
+            
             if (story_data) {
-
-                test_scenes.scenes.forEach((scene, index) => renderSceneCard(scene, index, test_scenes.story_id, draft_story && draft_story.draft_story ? true : false, true));
-
-                // Attach event listeners once DOM is populated
+                // test_scenes.scenes.forEach((scene, index) => renderSceneCard(scene, index, test_scenes.story_id, draft_story && draft_story.draft_story ? true : false, true));
+                for (let index = 0; index < test_scenes.scenes.length; index++) {
+                    renderSceneCard(test_scenes['scenes'][index], index, test_scenes.story_id, draft_story && draft_story.draft_story ? true : false, true)
+                }
                 ai_generated_scenes.addEventListener('click', async (event) => {
                     const target = event.target.closest('button');
                     if (!target) return;
@@ -78,20 +89,31 @@
                         await handleSceneInteraction(target, false);
                     }
                 });
-                // const temp_scenes_obj = [
-                //     {scene_id: "1", scene: "Loading...", imagePrompt: "Loading..." },
-                //     {scene_id: "1", scene: "Loading...", imagePrompt: "Loading..." },
-                //     {scene_id: "1", scene: "Loading...", imagePrompt: "Loading..." },
-                //     {scene_id: "1", scene: "Loading...", imagePrompt: "Loading..." },
-                //     {scene_id: "1", scene: "Loading...", imagePrompt: "Loading..." },
-                //     {scene_id: "1", scene: "Loading...", imagePrompt: "Loading..." }
-                // ]
-                // temp_scenes_obj.forEach((scene, index) => renderSceneCard(scene, index, "12345678", false, true));
                 document.getElementById("next_").addEventListener('click', async (event) => { await generate_audio_page() });
+            }
+            
+            function enable_page_control_btn() {
+                loader2.style.display = "none";
+                generateText.style.display = "flex";
+                next_page_btn.disabled = false;
+                next_page_btn.style.cursor = "pointer";
+                back_page_btn.disabled = false;
+                back_page_btn.style.cursor = "pointer";
+            }
+
+            function disable_page_control_btn() {
+                loader2.style.display = "block";
+                generateText.style.display = "none";
+                next_page_btn.disabled = true;
+                next_page_btn.style.cursor = "not-allowed";
+                back_page_btn.disabled = true;
+                back_page_btn.style.cursor = "not-allowed";
             }
 
             function renderSceneCard(scene, index, storyId, old_scene = false, isTempLoadingObj = false) {
                 const { scene_id: sceneId, scene: sceneText, imagePrompt } = scene;
+                
+                disable_page_control_btn();
 
                 if (!isTempLoadingObj) {
                     document.querySelectorAll('.temporary_loading_obj').forEach(el => {
@@ -128,6 +150,7 @@
                 const delay =  Math.floor((!old_scene ? Math.random() : 0.02) * 4000 ) + 1000;
                 hidden_story_id_.value = storyId;
                 setTimeout(() => populateSceneContent(sceneId, sceneText, imagePrompt), delay);
+                
             }
 
             function populateSceneContent(sceneId, sceneText, imagePrompt) {
@@ -143,6 +166,10 @@
 
                 content.style.display = 'block';
                 setTimeout(() => content.classList.add('fade_in_show_'), 50);
+                audiosGeneratedList.push(sceneId);
+
+                if (audiosGeneratedList.length == totalScenesFound) enable_page_control_btn();
+                
             }
 
 
@@ -157,9 +184,10 @@
 
                 const originalValue = textarea.value;
                 if (isRefresh) textarea.value = "";
+                disable_page_control_btn();
                 showOverlay(overlay, content);
-
                 try {
+                    
                     const response = isRefresh
                         ? await refresh_scene(storyId, sceneId)
                         : await update_scene(storyId, sceneId, textarea.value);
@@ -190,7 +218,10 @@
             function hideOverlay(overlay, content) {
                 overlay.style.opacity = 0;
                 overlay.style.pointerEvents = 'none';
-                setTimeout(() => content.classList.add('fade_in_show_'), 50);
+                setTimeout(() => {
+                    content.classList.add('fade_in_show_');
+                    enable_page_control_btn();
+                }, 50);
             }
 
             async function generate_audio_page() {

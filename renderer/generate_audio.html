@@ -14,17 +14,29 @@
         </div>
     </header>
 
+    <input type="text" style="display: none;" id="selectedFilePath" value="">
+
     <div id="upload_audio">
         <p>Select Speaker Voice</p>
         <div>
             <p style="font-size: 2vh;">Select Speaker: </p>
-            <input type="file" name="" id="speaker_file_picker" placeholder="" accept="audio/*">
+            <button type="button" id="speaker_file_picker" style="
+                outline: none;
+                border-radius: 10px; 
+                border: none;
+                background-color: white;
+                color: #736e6e;
+                text-align: start;
+                font-size: 1.4vh;
+                padding-left: 10px;"
+            >
+                Select Speaker File
         </div>
         <div>
-            <button onclick="close_upload_popup()" class="page_control_" id="back_" style="background-color: transparent;width: auto;  color: #666060;">
+            <button class="page_control_" id="cancel_popup_" style="background-color: transparent;width: auto;  color: #666060;">
                 Cancel
             </button>
-            <button onclick="upload_audio()" class="page_control_" style="text-align: center; background-color: rgb(90 43 141);color: white;" id="upload_and_generate">
+            <button class="page_control_" style="text-align: center; background-color: rgb(90 43 141);color: white;" id="upload_and_generate">
                 Generate Audio
                 <div class="loader" id="loading_animation">
                 </div>
@@ -37,7 +49,8 @@
     <div class="content-wrapper">
         <div class="content">
             <div id="message">
-                <p>We're generated Audios for you</p>
+                <p>Let's Generate Audios For Scenes</p>
+                <p style="font-size: 3vh;color: white;font-weight: normal;">Select Speaker Voice & Hold Back</p>
             </div>
     
             <div id="progress_container">
@@ -46,7 +59,7 @@
             </div>
     
             <p id="generation_output">
-                Preparing Video...
+                Please Select the Speaker Voice First...
             </p>
     
             <div class="button-container">
@@ -54,10 +67,10 @@
                     Back
                 </button>
     
-                <button onclick="open_upload_popup()" class="page_control_" style="background-color: rgb(90 43 141);" id="next_" class="flex-center">
+                <button class="page_control_" style="background-color: rgb(90 43 141);" id="next_" class="flex-center">
                     <p id="generate_text">Generate Audio</p>
     
-                    <div class="loader" id="loading_animation">
+                    <div class="loader" id="loading_animation_2">
                     </div>
                 </button>
             </div>
@@ -73,15 +86,67 @@
         const audio_input = document.getElementById("speaker_file_picker");
         const upload_popup = document.getElementById("upload_audio");
         const loader = document.getElementById("loading_animation");
+        const loader2 = document.getElementById("loading_animation_2");
         const generateText = document.getElementById("generate_text");
+        const progressBar = document.getElementById("audio_progress");
+        const porgressMessage = document.getElementById("generation_output");
+        const next_page_btn = document.getElementById("next_");
+        const back_page_btn = document.getElementById("back_");
+        
+        let is_speaker_selected = false
         let is_audios_genereted = false;
+        let audios_progress = 0;
 
         let story_data = JSON.parse(localStorage.getItem('story_data'));
         console.log(story_data);
+        
+        function enable_page_control_btn() {
+            loader2.style.display = "none";
+            generateText.style.display = "flex";
+            next_page_btn.disabled = false;
+            next_page_btn.style.cursor = "pointer";
+            back_page_btn.disabled = false;
+            back_page_btn.style.cursor = "pointer";
+        }
 
-        function open_upload_popup() {
-            if (is_audios_genereted) go_next();
+        function disable_page_control_btn() {
+            loader2.style.display = "block";
+            generateText.style.display = "none";
+            next_page_btn.disabled = true;
+            next_page_btn.style.cursor = "not-allowed";
+            back_page_btn.disabled = true;
+            back_page_btn.style.cursor = "not-allowed";
+        }
+        
+        function updateProgress(newProgress, message) {
+            // Ensure newProgress is within bounds (0-100)
+            newProgress = Math.min(100, Math.max(0, newProgress));
+            // Apply smooth transition effect
+            progressBar.style.transition = "width 0.5s ease-in-out";
+            // Update width based on new progress
+            progressBar.style.width = newProgress + "%";
+            // Update last progress value for next iteration
+            audios_progress = newProgress;
+            porgressMessage.innerText = message;
+        }
+
+
+        
+        async function open_upload_popup() {
+            if (is_speaker_selected && !is_audios_genereted) {
+                disable_page_control_btn()
+                await transcribe_audios();
+                enable_page_control_btn()
+                next_page_btn.innerText = "Generate Image";
+                is_audios_genereted = true;
+                porgressMessage.innerText = "Audios Generated for scenes. Click 'Generate Image' to generate Images";
+                
+
+            } else if (is_speaker_selected && is_audios_genereted) {
+                go_next();
+            }
             else {
+                porgressMessage.innerText = "Please Select the Speaker Voice First..."
                 upload_popup.style.display = "block";
                 document.querySelector('.content').classList.add('blurred');
             }
@@ -90,7 +155,7 @@
         function close_upload_popup() {
             upload_popup.style.display = "none";
             document.querySelector('.content').classList.remove('blurred');
-            document.getElementById('popup').style.display = 'none';
+            document.getElementById('upload_audio').style.display = 'none';
         }
 
         function isValidAudioFile(file) {
@@ -107,12 +172,13 @@
 
             loader.style.display = "block";
             generateText.style.display = "none";
-            const file = audio_input.files[0];
 
-            if (isValidAudioFile(file)) {
+            if (document.getElementById('selectedFilePath').value) {
                 if (upload_popup) upload_popup.style.display = "none";
-                is_audios_genereted = true;
+                is_speaker_selected = true;
                 document.querySelector('.content').classList.remove('blurred');
+                porgressMessage.innerText = "Everything Setup! Please click Generate to transcibe text..."
+
             } else {
                 alert("Please Select Speaker File Path First (Audio)...")
             }
@@ -121,16 +187,57 @@
             
         }
 
-        function transcribe_audios() {
-            story_data.scenes.forEach((scene, index) => {
-                const { scene_id: sceneId, scene: sceneText, imagePrompt } = scene;
-                const audioFilePath = `audio/${sceneId}.wav`;
-                transcribe_scene(audioFilePath, sceneText, index);
-            });
+        async function pickSpeakerFile() {
+            const result = await window.api.call('dialog:pickFile');
+            if (result.canceled || !result.filePaths.length) return;
+
+            const filePath = result.filePaths[0];
+            document.getElementById('selectedFilePath').value = filePath;
+            window.selectedSpeakerFilePath = filePath;
+            audio_input.innerText = filePath;
+        }
+
+        async function transcribe_audios() {
+            if (is_speaker_selected){
+
+                // const filePath = window.selectedSpeakerFilePath;
+                // console.log(`Speaker File Path: ${filePath}`);
+                // console.log(story_data, story_data['scenes'])
+
+                // const { scene_id: sceneId, scene: sceneText, imagePrompt } = story_data.draft_story.scenes[0];
+                // const audioFilePath = `audio/${sceneId}.wav`;
+                // const res = await transcribe_scene(story_data.story_id, sceneId, filePath);
+                // console.log(res)
+                // return;
+                
+                const filePath = window.selectedSpeakerFilePath;
+                console.log(`Speaker File Path: ${filePath}`);
+
+                for (let index = 0; index < story_data.draft_story.scenes.length; index++) {
+                    const scene = story_data.draft_story.scenes[index];
+                    const { scene_id: sceneId, scene: sceneText, imagePrompt } = scene;
+
+                    // Ensure transcription completes before moving to the next scene
+                    const res = await transcribe_scene(story_data.story_id, sceneId, filePath);
+                    console.log("Transcription Result:", res);
+
+                    // Update progress smoothly step by step
+                    updateProgress(((index + 1) / story_data.draft_story.scenes.length) * 100, `Transcribing Scene ${index + 1}`);
+                }
+            }
+            
         }
         function go_next() {
             window.location.href = 'image_render.html';
         }
+
+        document.getElementById("next_").addEventListener('click', async (event) => { open_upload_popup() });
+        document.getElementById("upload_and_generate").addEventListener('click', (event) => { upload_audio() });
+        document.getElementById("cancel_popup_").addEventListener('click', (event) => { close_upload_popup() });
+        document.getElementById("speaker_file_picker").addEventListener('click', (event) => { pickSpeakerFile() });
+        
+        
+
     </script>
 </body>
 
