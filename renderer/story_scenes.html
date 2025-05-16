@@ -23,7 +23,6 @@
         <div id="AI_generated_scenes"></div>
         <input type="text" name="hidden_" id="hidden_story_id_" style="display: none;">
             
-
         <div class="page_controls_container" style="position: absolute;bottom: 10px;">
             <button onclick="history.back();" class="page_control_" id="back_">
                 Back
@@ -33,65 +32,24 @@
                 <div class="loader" id="loading_animation_2"></div>
             </button>
         </div>
-
     </div>
 
     <script type="module">
-
         import { generate_scenes, refresh_scene, update_scene, get_story } from './scripts/scenes.js';
 
-        const ai_generated_scenes = document.getElementById("AI_generated_scenes");
-        const hidden_story_id_ = document.getElementById("hidden_story_id_");
-        const loader2 = document.getElementById("loading_animation_2");
-        const generateText = document.getElementById("generate_text");
-        const next_page_btn = document.getElementById("next_");
-        const back_page_btn = document.getElementById("back_");
-
-        let isScenesFullyLoaded = false;
-        let audiosGeneratedList = [];
-        let totalScenesFound = 0;
-
-        async function generate_ai_scenes() {
-
-            const story_data = JSON.parse(localStorage.getItem('story_data'));
-            console.log(story_data);
-
-            let test_scenes = null;
-            const draft_story = JSON.parse(localStorage.getItem('story_data'));
-            console.log(draft_story);
-            
-            test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generate_scenes(story_data.prompt, story_data.duration);
-        }
-
         window.addEventListener('DOMContentLoaded', async () => {
-            const story_data = JSON.parse(localStorage.getItem('story_data'));
-            console.log(story_data);
+            const ai_generated_scenes = document.getElementById("AI_generated_scenes");
+            const hidden_story_id_ = document.getElementById("hidden_story_id_");
+            const loader2 = document.getElementById("loading_animation_2");
+            const generateText = document.getElementById("generate_text");
+            const next_page_btn = document.getElementById("next_");
+            const back_page_btn = document.getElementById("back_");
 
-            let test_scenes = null;
-            const draft_story = JSON.parse(localStorage.getItem('story_data'));
-            console.log(draft_story);
-            test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generate_scenes(story_data.prompt, story_data.duration);
-            totalScenesFound = test_scenes.scenes.length;
-            
-            
-            if (story_data) {
-                // test_scenes.scenes.forEach((scene, index) => renderSceneCard(scene, index, test_scenes.story_id, draft_story && draft_story.draft_story ? true : false, true));
-                for (let index = 0; index < test_scenes.scenes.length; index++) {
-                    renderSceneCard(test_scenes['scenes'][index], index, test_scenes.story_id, draft_story && draft_story.draft_story ? true : false, true)
-                }
-                ai_generated_scenes.addEventListener('click', async (event) => {
-                    const target = event.target.closest('button');
-                    if (!target) return;
+            let isScenesFullyLoaded = false;
+            let audiosGeneratedList = [];
+            let totalScenesFound = 0;
 
-                    if (target.classList.contains('refresh_prompt_btn_')) {
-                        await handleSceneInteraction(target, true);
-                    } else if (target.classList.contains('update_prompt_btn_')) {
-                        await handleSceneInteraction(target, false);
-                    }
-                });
-                document.getElementById("next_").addEventListener('click', async (event) => { await generate_audio_page() });
-            }
-            
+            // Enable Page Control Btn
             function enable_page_control_btn() {
                 loader2.style.display = "none";
                 generateText.style.display = "flex";
@@ -101,6 +59,7 @@
                 back_page_btn.style.cursor = "pointer";
             }
 
+            // Disable Page Control Btn
             function disable_page_control_btn() {
                 loader2.style.display = "block";
                 generateText.style.display = "none";
@@ -109,12 +68,19 @@
                 back_page_btn.disabled = true;
                 back_page_btn.style.cursor = "not-allowed";
             }
+            
+            // Generate Scenes Backend API Request
+            async function generate_ai_scenes() {
+                let test_scenes = null;
+                const story_data = JSON.parse(localStorage.getItem('story_data'));
+                const draft_story = JSON.parse(localStorage.getItem('story_data'));            
+                test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generate_scenes(story_data.prompt, story_data.duration);
+            }
 
+            // Render Scenes From API Fetched Data
             function renderSceneCard(scene, index, storyId, old_scene = false, isTempLoadingObj = false) {
                 const { scene_id: sceneId, scene: sceneText, imagePrompt } = scene;
-                
                 disable_page_control_btn();
-
                 if (!isTempLoadingObj) {
                     document.querySelectorAll('.temporary_loading_obj').forEach(el => {
                         el.replaceWith(el.cloneNode(false));
@@ -122,7 +88,6 @@
                         el = null;
                     });
                 }
-
                 const elem_html = `
                     <div id="scene_${sceneId}" class="generated_scenes_ loading_state_ ${isTempLoadingObj? 'temporary_loading_obj': ''}">
                         <div class="loading_overlay_full_">
@@ -143,16 +108,15 @@
                             </div>
                             <input type="hidden" id="hidden_image_prompt_${sceneId}" data-story-id="${storyId}" data-scene-id="${sceneId}">
                         </div>
-                    </div>
-                `;
-
+                    </div>`;
                 ai_generated_scenes.insertAdjacentHTML('beforeend', elem_html);
                 const delay =  Math.floor((!old_scene ? Math.random() : 0.02) * 4000 ) + 1000;
                 hidden_story_id_.value = storyId;
                 setTimeout(() => populateSceneContent(sceneId, sceneText, imagePrompt), delay);
-                
             }
 
+
+            // Populate Data after animation: Render_Scenes -> Populate
             function populateSceneContent(sceneId, sceneText, imagePrompt) {
                 const container = document.getElementById(`scene_${sceneId}`);
                 const overlay = container.querySelector('.loading_overlay_full_');
@@ -167,12 +131,11 @@
                 content.style.display = 'block';
                 setTimeout(() => content.classList.add('fade_in_show_'), 50);
                 audiosGeneratedList.push(sceneId);
-
-                if (audiosGeneratedList.length == totalScenesFound) enable_page_control_btn();
-                
+                if (audiosGeneratedList.length == totalScenesFound) enable_page_control_btn(); 
             }
 
 
+            // Handle Scenes Interaction: Update, Refresh
             async function handleSceneInteraction(button, isRefresh) {
                 const sceneId = button.getAttribute('data-scene-id');
                 const storyId = button.getAttribute('data-story-id');
@@ -187,7 +150,6 @@
                 disable_page_control_btn();
                 showOverlay(overlay, content);
                 try {
-                    
                     const response = isRefresh
                         ? await refresh_scene(storyId, sceneId)
                         : await update_scene(storyId, sceneId, textarea.value);
@@ -209,12 +171,14 @@
                 }
             }
 
+            // Show Skeleton Progress Animation
             function showOverlay(overlay, content) {
                 overlay.style.opacity = 1;
                 overlay.style.pointerEvents = 'all';
                 content.classList.remove('fade_in_show_');
             }
 
+            // Hide or Remove Skeleton Progress Animation
             function hideOverlay(overlay, content) {
                 overlay.style.opacity = 0;
                 overlay.style.pointerEvents = 'none';
@@ -224,8 +188,8 @@
                 }, 50);
             }
 
+            // Goto Next Page: Generate Audio
             async function generate_audio_page() {
-
                 const updated_story_data = await get_story(hidden_story_id_.value);
                 localStorage.setItem('story_data', JSON.stringify({
                         prompt: story_data.prompt,
@@ -234,21 +198,32 @@
                         story_id: hidden_story_id_.value,
                         draft_story: updated_story_data,
                     }));
-
                 window.location.href = 'generate_audio.html';
             }
 
-            function go_back() {
-                history.back();
+            // MAIN Code!
+            let test_scenes = null;
+            const story_data = JSON.parse(localStorage.getItem('story_data'));
+            const draft_story = JSON.parse(localStorage.getItem('story_data'));
+            console.log(draft_story);
+            test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generate_scenes(story_data.prompt, story_data.duration);
+            totalScenesFound = test_scenes.scenes.length;
+            
+            if (story_data) {
+                // test_scenes.scenes.forEach((scene, index) => renderSceneCard(scene, index, test_scenes.story_id, draft_story && draft_story.draft_story ? true : false, true));
+                for (let index = 0; index < test_scenes.scenes.length; index++) {
+                    renderSceneCard(test_scenes['scenes'][index], index, test_scenes.story_id, draft_story && draft_story.draft_story ? true : false, true)
+                }
+                ai_generated_scenes.addEventListener('click', async (event) => {
+                    const target = event.target.closest('button');
+                    if (!target) return;
+                    if (target.classList.contains('refresh_prompt_btn_')) await handleSceneInteraction(target, true);
+                    else if (target.classList.contains('update_prompt_btn_')) await handleSceneInteraction(target, false);
+                });
+                document.getElementById("next_").addEventListener('click', async (event) => { await generate_audio_page() });
             }
-
         });
-
-        
-
     </script>
-
-
 </body>
 
 </html>

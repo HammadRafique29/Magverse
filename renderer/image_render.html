@@ -6,138 +6,7 @@
     <title>My Electron App</title>
     <link rel="stylesheet" href="styles/index.css">
     <link rel="stylesheet" href="styles/prompt.css">
-    <style>
-
-        /* Rendering Image Container Styles */
-        #redering_image_container {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            row-gap: 40px;
-            padding: 20px;
-            position: relative;
-            z-index: 9;
-            width: 80%;
-            height: 80%;
-            /* margin-top: -30px; */
-            border-radius: 10px;
-            overflow-y: scroll;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        #redering_image_container::-webkit-scrollbar {
-            display: none;
-        }
-
-        /* Rendered Image Styles */
-        #rendered_image_1 {
-            width: 90%;
-            height: 35%;
-            display: flex;
-            column-gap: 10px;
-        }
-
-        .rendered_image_container {
-            width: 35%;
-            height: 100%;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.493);
-        }
-
-        .rendered_image_container img {
-            width: 100%;
-            height: 100%;
-            border-radius: 10px;
-            object-fit: cover;
-        }
-
-        .rendered_image_details_container {
-            width: 60%;
-            display: flex;
-            flex-direction: column;
-            row-gap: 10px;
-        }
-
-        /* Scene Styles */
-        .generated_scenes_ {
-            width: 100%;
-        }
-
-        .scene_ids_ {
-            font-weight: bold;
-        }
-
-        .scene_prompt_textarea {
-            width: 100%;
-            resize: vertical;
-        }
-
-        .scenes_controls_ {
-            display: flex;
-            gap: 5px;
-        }
-
-        .scenes_controls_ button {
-            cursor: pointer;
-        }
-
-        /* Image Generation Settings Styles */
-        .image_generation_settings_ {
-            width: 99%;
-            height: 20%;
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .render_image_style_ {
-            padding: 5px 10px;
-            border-radius: 5px;
-            border: none;
-            background-color: #555;
-            color: white;
-            cursor: pointer;
-        }
-
-        /* Loader Styles */
-        .loader {
-            display: none;
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-top: 4px solid rgb(255, 255, 255);
-            border-radius: 50%;
-            width: 3vh;
-            height: 3vh;
-            animation: spin 2s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Absolute Positioning Styles */
-        .bottom_controls {
-            z-index: 11;
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 98%;
-            height: 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            column-gap: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="styles/image.css">
 </head>
 
 <body>
@@ -152,11 +21,14 @@
             <p>Here is the most beautiful Part </p>
         </div>
 
+        <input type="text" name="hidden_" id="hidden_story_id_" style="display: none;">
+
         <div id="redering_image_container">
-            <div id="rendered_image_1">
+            <div class="rendered_image_">
 
                 <div class="rendered_image_container">
                     <img src="../assets/img/renderd_img.png" alt="" srcset="">
+                    <span class="custom-loader"></span>
                 </div>
 
                 <div class="rendered_image_details_container">
@@ -189,81 +61,10 @@
 
             </div>
 
-            <div id="rendered_image_1">
-
-                <div class="rendered_image_container">
-                    <img src="../assets/img/renderd_img.png" alt="" srcset="">
-                </div>
-
-                <div class="rendered_image_details_container">
-                    <div id="scene_2" class="generated_scenes_">
-                        <div class="scene_ids_">Scene1</div>
-                        <div class="scene_prompt_">
-                            <textarea class="scene_prompt_textarea" name="scene_output_1" id="scene_output_1" cols="30">Once we get the prompts, we will save it into google sheets, you're BG  friend will look into them and select the best scenes. Than he will copy & paste then text-to-image or video prompts to generate the  content.
-                            </textarea>
-                        </div>
-                        <div class="scenes_controls_">
-                            <button type="button" class="refresh_prompt_btn_">
-                                <img src="../assets/img/refresh.png" width="30" height="30"
-                                    style="background-color:transparent;" alt="" srcset="">
-                            </button>
-                            <button id="update_prompt" class="update_prompt_btn_">Update</button>
-                        </div>
-                    </div>
-
-                    <div class="image_generation_settings_">
-                        <button type="button" class="re-generate_image_ render_image_style_">
-                            Re-generate Image
-                        </button>
-                        <select class="image_resolution_ render_image_style_">
-                            <option>720 x 1080</option>
-                            <option>1080 x 1920</option>
-                            <option>1920 x 1080</option>
-                        </select>
-                    </div>
-                </div>
-
-            </div>
-
-            <div id="rendered_image_1">
-
-                <div class="rendered_image_container">
-                    <img src="../assets/img/renderd_img.png" alt="" srcset="">
-                </div>
-
-                <div class="rendered_image_details_container">
-                    <div id="scene_2" class="generated_scenes_">
-                        <div class="scene_ids_">Scene1</div>
-                        <div class="scene_prompt_">
-                            <textarea class="scene_prompt_textarea" name="scene_output_1" id="scene_output_1" cols="30">Once we get the prompts, we will save it into google sheets, you're BG  friend will look into them and select the best scenes. Than he will copy & paste then text-to-image or video prompts to generate the  content.
-                            </textarea>
-                        </div>
-                        <div class="scenes_controls_">
-                            <button type="button" class="refresh_prompt_btn_">
-                                <img src="../assets/img/refresh.png" width="30" height="30"
-                                    style="background-color:transparent;" alt="" srcset="">
-                            </button>
-                            <button id="update_prompt" class="update_prompt_btn_">Update</button>
-                        </div>
-                    </div>
-
-                    <div class="image_generation_settings_">
-                        <button type="button" class="re-generate_image_ render_image_style_">
-                            Re-generate Image
-                        </button>
-                        <select class="image_resolution_ render_image_style_">
-                            <option>720 x 1080</option>
-                            <option>1080 x 1920</option>
-                            <option>1920 x 1080</option>
-                        </select>
-                    </div>
-                </div>
-
-            </div>
         </div>
 
         <div class="bottom_controls">
-            <button onclick="go_back()" class="page_control_" id="back_">
+            <button onclick="history.back()" class="page_control_" id="back_">
                 Back
             </button>
 
@@ -276,14 +77,234 @@
         </div>
     </div>
     <script type="module" src="scripts/index.js"></script>
-    <script>
-        document.getElementById('next_').addEventListener('click', () => {
-            window.location.href = 'story_scenes.html';
-        });
+    <script type="module">
 
-        function go_back() {
-            history.back()
+        import { generate_scenes, refresh_scene, update_scene, get_story } from './scripts/scenes.js';
+        import { generate_image } from './scripts/images.js'
+
+        const redering_image_container = document.getElementById("redering_image_container");
+        const hidden_story_id_ = document.getElementById("hidden_story_id_");
+        const loader2 = document.getElementById("loading_animation");
+        const generateText = document.getElementById("generate_text");
+        const next_page_btn = document.getElementById("next_");
+        const back_page_btn = document.getElementById("back_");
+        const rendered_images_list = [];
+
+        function enable_page_control_btn() {
+            loader2.style.display = "none";
+            generateText.style.display = "flex";
+            next_page_btn.disabled = false;
+            next_page_btn.style.cursor = "pointer";
+            back_page_btn.disabled = false;
+            back_page_btn.style.cursor = "pointer";
         }
+        function disable_page_control_btn() {
+            loader2.style.display = "block";
+            generateText.style.display = "none";
+            next_page_btn.disabled = true;
+            next_page_btn.style.cursor = "not-allowed";
+            back_page_btn.disabled = true;
+            back_page_btn.style.cursor = "not-allowed";
+        }
+
+        // Show Skeleton Progress Animation
+        function showOverlay(overlay, content) {
+            overlay.style.opacity = 1;
+            overlay.style.pointerEvents = 'all';
+            content.classList.remove('fade_in_show_');
+        }
+
+        // Hide or Remove Skeleton Progress Animation
+        function hideOverlay(overlay, content) {
+            overlay.style.opacity = 0;
+            overlay.style.pointerEvents = 'none';
+            content.style.display = "block";
+            setTimeout(() => {
+                content.classList.add('fade_in_show_');
+                enable_page_control_btn();
+            }, 50);
+        }
+        
+        // Handle Scenes Interaction: Update, Refresh
+        async function handleSceneInteraction(button, isRefresh) {
+            const sceneId = button.getAttribute('data-scene-id');
+            const storyId = button.getAttribute('data-story-id');
+            const container = document.getElementById(`scene_${sceneId}`);
+            const overlay = container.querySelector('.loading_overlay_full_');
+            const content = container.querySelector('.scene_content_');
+            const textarea = container.querySelector(`#scene_output_${sceneId}`);
+            const hiddenInput = container.querySelector(`#hidden_image_prompt_${sceneId}`);
+
+            const originalValue = textarea.value;
+            if (isRefresh) textarea.value = "";
+            disable_page_control_btn();
+            showOverlay(overlay, content);
+            try {
+                const response = isRefresh
+                    ? await refresh_scene(storyId, sceneId)
+                    : await update_scene(storyId, sceneId, textarea.value);
+
+                setTimeout(() => {
+                    if (!response) {
+                        alert(`Failed to ${isRefresh ? "refresh" : "update"} scene. Please try again.`);
+                        console.error(`Failed to ${isRefresh ? "refresh" : "update"} scene`);
+                        if (isRefresh) textarea.value = originalValue;
+                    } else {
+                        textarea.value = response.scene;
+                        hiddenInput.value = response.imagePrompt;
+                    }
+                    hideOverlay(overlay, content);
+                }, 1500 + Math.random() * 1000);
+            } catch (err) {
+                console.error(err);
+                hideOverlay(overlay, content);
+            }
+        }
+
+        function renderScenesDetails(scene, index, storyId) {
+            const { scene_id: sceneId, scene: sceneText, imagePrompt } = scene;
+            disable_page_control_btn();
+
+            const elem_html = `
+            <div class="rendered_image_">
+                <div class="rendered_image_container">
+                    <img src="" id="render_image_src_${sceneId}" alt="" srcset="" style="display: none;">
+                    <span id="custom_loader_${sceneId}" class="custom-loader"></span>
+                </div>
+
+                <div class="rendered_image_details_container">
+                    <div id="scene_${sceneId}" class="generated_scenes_">
+                        <div class="loading_overlay_full_">
+                            <div class="shimmer_"></div>
+                            <div class="spinner_circle"></div>
+                        </div>
+                        <div class="scene_content_" style="display: none;height: 200px;">
+                            <div class="scene_ids_">Scene${index+1}</div>
+                            <div class="scene_prompt_">
+                                <textarea class="scene_prompt_textarea" name="scene_output_${sceneId}" id="scene_output_${sceneId}" cols="30">${sceneText}</textarea>
+                                </textarea>
+                            </div>
+                            <div class="scenes_controls_">
+                                <button type="button" class="refresh_prompt_btn_" data-story-id="${storyId}" data-scene-id="${sceneId}">
+                                    <img src="../assets/img/refresh.png" width="30" height="30"
+                                        style="background-color:transparent;" alt="" srcset="">
+                                </button>
+                                <button id="update_prompt_${sceneId}"  data-story-id="${storyId}" data-scene-id="${sceneId}" class="update_prompt_btn_">Update</button>
+                                <input type="hidden" id="hidden_image_prompt_${sceneId}" data-story-id="${storyId}" data-scene-id="${sceneId}" value="${imagePrompt}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image_generation_settings_">
+                        <button type="button" class="re-generate_image_ render_image_style_" data-story-id="${storyId}" data-scene-id="${sceneId}">
+                            Re-generate Image
+                        </button>
+                        <select class="image_resolution_ render_image_style_" style="display: none;">
+                            <option>720 x 1080</option>
+                            <option>1080 x 1920</option>
+                            <option>1920 x 1080</option>
+                        </select>
+                    </div>
+                </div>
+            </div>`;
+            redering_image_container.insertAdjacentHTML('beforeend', elem_html);
+            hidden_story_id_.value = storyId;
+            const container = document.getElementById(`scene_${sceneId}`);
+            const overlay = container.querySelector('.loading_overlay_full_');
+            const content = container.querySelector('.scene_content_');
+            hideOverlay(overlay, content);
+        }
+
+        async function generate_ai_images(totalScenes, story_id, scene_id, old_render_image) {
+
+            const image_render_src = document.getElementById(`render_image_src_${scene_id}`);
+            const scene_loader = document.getElementById(`custom_loader_${scene_id}`);
+
+            let res_img_path = !old_render_image? await generate_image(story_id, scene_id) : old_render_image;
+            console.log(`Response ${scene_id}: `, res_img_path)
+            scene_loader.style.display = "none";
+            image_render_src.src = res_img_path;
+            image_render_src.style.display = "flex";
+            rendered_images_list.push(res_img_path);
+            if (rendered_images_list.length == totalScenes) {
+                enable_page_control_btn();
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            
+            const story_data = JSON.parse(localStorage.getItem('story_data'));
+            let draft_story = story_data.draft_story;
+            let old_render_images = story_data.render_images;
+
+            const story_data_ = {
+                "scenes": [
+                    {
+                        "scene": "Ollama Morning mist curled around the roots of ancient trees as a young girl named Elara wandered deeper into the heart of the forest, drawn by a melody only she could hear.",
+                        "imagePrompt": "a young girl walking through a misty magical forest with ancient trees and soft morning light",
+                        "scene_id": 43625
+                    },
+                    {
+                        "scene": "Ollama A fox with silver fur and wise eyes appeared before her, motioning with its head as if to say, “Follow me.”",
+                        "imagePrompt": "a silver-furred fox with glowing eyes standing on a forest path, early sunlight streaming through the trees",
+                        "scene_id": 3957
+                    },
+                    {
+                        "scene": "Ollama They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air.",
+                        "imagePrompt": "a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky",
+                        "scene_id": 87809
+                    },
+                    {
+                        "scene": "Ollama At the center stood a hollow tree with a spiral staircase leading deep underground, its bark carved with glowing runes.",
+                        "imagePrompt": "an ancient hollow tree with glowing runes and a spiral staircase descending inside",
+                        "scene_id": 42199
+                    },
+                    {
+                        "scene": "Ollama Elara hesitated, then stepped into the tree, her heart pounding as the air shimmered around her.",
+                        "imagePrompt": "a girl entering a glowing tree with a magical aura, the inside illuminated by mysterious light",
+                        "scene_id": 28725
+                    },
+                    {
+                        "scene": "Ollama They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air.",
+                        "imagePrompt": "a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky",
+                        "scene_id": 44288
+                    }
+                ],
+                "story_id": 61355
+            }
+
+            console.log('story_data', story_data);
+            disable_page_control_btn()
+
+            if (draft_story) {
+                for (let index = 0; index < draft_story.scenes.length; index++) {
+                    renderScenesDetails(draft_story['scenes'][index], index, draft_story.story_id)
+                }
+                for (let index = 0; index < draft_story.scenes.length; index++) {
+                    generate_ai_images(draft_story.scenes.length, draft_story.story_id, draft_story.scenes[index]['scene_id'], !old_render_images? null : old_render_images[index])
+                }
+
+                redering_image_container.addEventListener('click', async (event) => {
+                    const target = event.target.closest('button');
+                    if (!target) return;
+                    if (target.classList.contains('refresh_prompt_btn_')) await handleSceneInteraction(target, true);
+                    else if (target.classList.contains('update_prompt_btn_')) await handleSceneInteraction(target, false);
+                });
+            }
+            document.getElementById('next_').addEventListener('click', async () => {
+                const updated_story_data = await get_story(hidden_story_id_.value);
+                localStorage.setItem('story_data', JSON.stringify({
+                        prompt: story_data.prompt,
+                        video_dur: story_data.video_dur,
+                        video_res: story_data.video_res,
+                        story_id: hidden_story_id_.value,
+                        draft_story: updated_story_data,
+                        audios_list: story_data.audios_list,
+                        render_images: rendered_images_list,
+                    }));
+                window.location.href = 'generate_video.html';
+            });
+        });
     </script>
 </body>
 

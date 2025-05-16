@@ -81,6 +81,7 @@
     <script type="module" src="scripts/index.js"></script>
 
     <script type="module">
+        import { generate_scenes, refresh_scene, update_scene, get_story } from './scripts/scenes.js';
         import { transcribe_scene } from './scripts/audio.js';
 
         const audio_input = document.getElementById("speaker_file_picker");
@@ -95,6 +96,7 @@
         
         let is_speaker_selected = false
         let is_audios_genereted = false;
+        let generated_audios_path = [];
         let audios_progress = 0;
 
         let story_data = JSON.parse(localStorage.getItem('story_data'));
@@ -119,19 +121,13 @@
         }
         
         function updateProgress(newProgress, message) {
-            // Ensure newProgress is within bounds (0-100)
             newProgress = Math.min(100, Math.max(0, newProgress));
-            // Apply smooth transition effect
             progressBar.style.transition = "width 0.5s ease-in-out";
-            // Update width based on new progress
             progressBar.style.width = newProgress + "%";
-            // Update last progress value for next iteration
             audios_progress = newProgress;
             porgressMessage.innerText = message;
         }
 
-
-        
         async function open_upload_popup() {
             if (is_speaker_selected && !is_audios_genereted) {
                 disable_page_control_btn()
@@ -140,11 +136,7 @@
                 next_page_btn.innerText = "Generate Image";
                 is_audios_genereted = true;
                 porgressMessage.innerText = "Audios Generated for scenes. Click 'Generate Image' to generate Images";
-                
-
-            } else if (is_speaker_selected && is_audios_genereted) {
-                go_next();
-            }
+            } else if (is_speaker_selected && is_audios_genereted) await go_next();
             else {
                 porgressMessage.innerText = "Please Select the Speaker Voice First..."
                 upload_popup.style.display = "block";
@@ -179,9 +171,7 @@
                 document.querySelector('.content').classList.remove('blurred');
                 porgressMessage.innerText = "Everything Setup! Please click Generate to transcibe text..."
 
-            } else {
-                alert("Please Select Speaker File Path First (Audio)...")
-            }
+            } else alert("Please Select Speaker File Path First (Audio)...")
             loader.style.display = "none";
             generateText.style.display = "flex";
             
@@ -200,16 +190,6 @@
         async function transcribe_audios() {
             if (is_speaker_selected){
 
-                // const filePath = window.selectedSpeakerFilePath;
-                // console.log(`Speaker File Path: ${filePath}`);
-                // console.log(story_data, story_data['scenes'])
-
-                // const { scene_id: sceneId, scene: sceneText, imagePrompt } = story_data.draft_story.scenes[0];
-                // const audioFilePath = `audio/${sceneId}.wav`;
-                // const res = await transcribe_scene(story_data.story_id, sceneId, filePath);
-                // console.log(res)
-                // return;
-                
                 const filePath = window.selectedSpeakerFilePath;
                 console.log(`Speaker File Path: ${filePath}`);
 
@@ -217,17 +197,24 @@
                     const scene = story_data.draft_story.scenes[index];
                     const { scene_id: sceneId, scene: sceneText, imagePrompt } = scene;
 
-                    // Ensure transcription completes before moving to the next scene
-                    const res = await transcribe_scene(story_data.story_id, sceneId, filePath);
-                    console.log("Transcription Result:", res);
-
-                    // Update progress smoothly step by step
+                    const audio_file_path = await transcribe_scene(story_data.story_id, sceneId, filePath);
+                    console.log("Transcription Result:", audio_file_path);
+                    generated_audios_path.push(audio_file_path)
                     updateProgress(((index + 1) / story_data.draft_story.scenes.length) * 100, `Transcribing Scene ${index + 1}`);
                 }
             }
             
         }
-        function go_next() {
+        async function go_next() {
+            const updated_story_data = await get_story(story_data.story_id);
+            localStorage.setItem('story_data', JSON.stringify({
+                    prompt: story_data.prompt,
+                    video_dur: story_data.video_dur,
+                    video_res: story_data.video_res,
+                    story_id: story_data.story_id,
+                    draft_story: updated_story_data,
+                    audios_list: generated_audios_path,
+                }));
             window.location.href = 'image_render.html';
         }
 

@@ -247,6 +247,12 @@
         const generateText = document.getElementById("generate_text");
         let is_audios_genereted = false;
 
+        let draft_story = null;
+        const story_data = JSON.parse(localStorage.getItem('story_data'));
+        draft_story = story_data.draft_story;
+
+        console.log(story_data);
+
         function open_upload_popup() {
             if (is_audios_genereted) go_next();
             else upload_popup.style.display = "block";
