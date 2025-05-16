@@ -19,3 +19,7 @@ export async function transcribeScene(story_id, scene_id, speaker_path) {
   return await window.api.call('model:transcribeScene', { story_id, scene_id, speaker_path });
 }
 
+export async function generateImage(story_id, scene_id) {
+  return await window.api.call('model:generateImage', { story_id, scene_id });
+}
+
