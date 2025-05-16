@@ -122,34 +122,31 @@ exports.transcribeScene = async (event, args) => {
       const target_scene = scenesArray[index];
       const text = target_scene.scene;
       const speakerAudioPath = speaker_path;
-
-      // Simulating a result
-      resolve("/home/magician/Music/intro.mp3"); // Resolve the result after timeout
-    }, 3000); // 10-second delay before resolving
+      // const result = generateSpeechWithSpeaker(text, speakerAudioPath);
+      resolve("/home/magician/Music/intro.mp3");
+    }, 1000);
   });
 };
 
 
-// exports.transcribeScene = async (event, args) => {
-//   const { story_id, scene_id, speaker_path } = args;
-//   setTimeout( async () => {
+exports.generateImage = async (event, args) => {
+  return new Promise((resolve) => {
+    setTimeout(async () => {
+      const { story_id, scene_id, speaker_path } = args;
 
-//     if (!stories_database[story_id]) {
-//       console.log("Story not found");
-//       return null;
-//     }
-//     const scenesArray = stories_database[story_id].scenes;
-//     const index = scenesArray.findIndex(scene => scene.scene_id == scene_id);
-//     if (index === -1) {
-//       console.log("Scene not found");
-//       return null;
-//     }
-//     const target_scene = scenesArray[index];
-//     const text = target_scene.scene           // 'This is my voice, generated with your speaker audio.';
-//     const speakerAudioPath = speaker_path     // '/absolute/path/to/your/speaker.wav'; // must be absolute
-//     // const result = generateSpeechWithSpeaker(text, speakerAudioPath);
-//     return "/home/magician/Music/intro.mp3"
-
-//   }, 10000); // Changes to 75% after 1 second
-  
-// };
+      if (!stories_database[story_id]) {
+        console.log("Story not found");
+        resolve(null);
+        return;
+      }
+      const scenesArray = stories_database[story_id].scenes;
+      const index = scenesArray.findIndex(scene => scene.scene_id == scene_id);
+      if (index === -1) {
+        console.log("Scene not found");
+        resolve(null);
+        return;
+      }
+      resolve("/home/magician/Desktop/story_teller/assets/img/renderd_img.png");
+    }, 2000);
+  });
+};
