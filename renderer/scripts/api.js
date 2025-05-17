@@ -26,3 +26,7 @@ export async function generateImage(story_id, scene_id) {
 export async function regenerateImage(story_id, scene_id) {
   return await window.api.call('model:regenerateImage', { story_id, scene_id });
 }
+
+export async function regenerateVideo(story_id, rendered_images, transcribed_audios, video_resolution ) {
+  return await window.api.call('model:generateVideo', { story_id, rendered_images, transcribed_audios, video_resolution  });
+}
