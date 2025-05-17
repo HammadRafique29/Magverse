@@ -192,15 +192,22 @@
 
                 const filePath = window.selectedSpeakerFilePath;
                 console.log(`Speaker File Path: ${filePath}`);
-
+                    
                 for (let index = 0; index < story_data.draft_story.scenes.length; index++) {
                     const scene = story_data.draft_story.scenes[index];
                     const { scene_id: sceneId, scene: sceneText, imagePrompt } = scene;
-
-                    const audio_file_path = await transcribe_scene(story_data.story_id, sceneId, filePath);
-                    console.log("Transcription Result:", audio_file_path);
-                    generated_audios_path.push(audio_file_path)
-                    updateProgress(((index + 1) / story_data.draft_story.scenes.length) * 100, `Transcribing Scene ${index + 1}`);
+                    
+                    try {
+                        const audio_file_path = "/home/magician/Documents/story_teller/output_audio_24901.wav" // await transcribe_scene(story_data.story_id, sceneId, filePath);
+                        console.log("Transcription Result:", audio_file_path);
+                        generated_audios_path.push(audio_file_path)
+                        updateProgress(((index + 1) / story_data.draft_story.scenes.length) * 100, `Transcribing Scene ${index + 1}`);
+                    } catch (error) {
+                        updateProgress(0, `Error transcribing scene ${index + 1}: ${error.message}`);
+                        enable_page_control_btn();
+                    }
+                    
+                
                 }
             }
             

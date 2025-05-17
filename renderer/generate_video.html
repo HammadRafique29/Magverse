@@ -39,72 +39,11 @@
             border: none;
         }
 
-        /* Upload Audio Popup Styles */
-        #upload_audio {
-            z-index: 10;
-            display: none;
-            padding: 40px;
-            position: absolute;
-            left: 30%;
-            top: 35%;
-            width: 40%;
-            height: 30%;
-            border-radius: 10px;
-            background-color: rgb(255, 255, 255);
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #upload_audio p {
-            margin-bottom: 20px;
-            font-size: 5vh;
-            text-align: center;
-            width: 100%;
-        }
-
-        #upload_audio div:first-of-type {
-            width: 96%;
-            display: flex;
-            column-gap: 10px;
-            justify-content: flex-start;
-            align-items: center;
-        }
-
-        #speaker_file_picker {
-            width: 40%;
-            height: auto;
-            color: white;
-            font-size: 1.8vh;
-            border-radius: 10px;
-            padding: 5px;
-            background-color: gray;
-        }
-
-        #upload_audio div:last-of-type {
-            position: absolute;
-            width: 90%;
-            bottom: 10px;
-            display: flex;
-            justify-content: flex-end;
-            column-gap: 10px;
-        }
-
         #back_ {
             color: black;
             background-color: rgba(8, 8, 8, 0);
             width: 15%;
             height: 100%;
-        }
-
-        #upload_and_generate {
-            display: flex;
-            align-items: center;
-            column-gap: 5px;
-            width: 35%;
-            height: 100%;
-            position: relative;
-            justify-content: center;
         }
 
         /* Content Styles */
@@ -124,8 +63,8 @@
             padding: 5px;
         }
 
-        #audio_progress {
-            width: 70%;
+        #video_progress {
+            width: 0%;
             height: 100%;
             background-color: #0b8617;
             border-radius: 10px;
@@ -191,31 +130,13 @@
         </div>
     </header>
 
-    <div id="upload_audio">
-        <p>Select Speaker Voice</p>
-        <div>
-            <p style="font-size: 2vh;">Select Speaker Voice: </p>
-            <input type="file" name="" id="speaker_file_picker" placeholder="" accept="audio/*">
-        </div>
-        <div>
-            <button onclick="close_upload_popup()" class="page_control_" id="back_">
-                Cancel
-            </button>
-            <button onclick="upload_audio()" class="page_control_" id="upload_and_generate">
-                Generate Audio
-                <div class="loader" id="loading_animation">
-                </div>
-            </button>
-
-        </div>
-    </div>
     <div class="content">
         <div id="message">
             <p>Hurrah! Generating Video</p>
         </div>
 
         <div id="progress_container">
-            <div id="audio_progress">
+            <div id="video_progress">
             </div>
         </div>
 
@@ -224,11 +145,11 @@
         </p>
 
         <div>
-            <button onclick="go_back()" class="page_control_" id="back_">
+            <button onclick="history.back()" class="page_control_" id="back_">
                 Back
             </button>
 
-            <button onclick="open_upload_popup()" class="page_control_" id="next_">
+            <button class="page_control_" id="next_">
                 <p id="generate_text">Generate Video</p>
 
                 <div class="loader" id="loading_animation">
@@ -239,54 +160,132 @@
     </div>
     <script type="module" src="scripts/index.js"></script>
 
-    <script>
+    <script type="module">
+        import { regenerateVideo } from './scripts/api.js';
+        import { io } from "https://cdn.socket.io/4.5.0/socket.io.esm.min.js";
+
+        const content = {
+            "prompt": "aksjdasd",
+            "video_dur": "5",
+            "video_res": "1280x720",
+            "story_id": "50800",
+            "draft_story": {
+                "scenes": [
+                    {
+                        "scene": "Morning mist curled around the roots of ancient trees as a young girl named Elara wandered deeper into the heart of the forest, drawn by a melody only she could hear.",
+                        "imagePrompt": "a young girl walking through a misty magical forest with ancient trees and soft morning light",
+                        "scene_id": 5469
+                    },
+                    {
+                        "scene": "A fox with silver fur and wise eyes appeared before her, motioning with its head as if to say, “Follow me.”",
+                        "imagePrompt": "a silver-furred fox with glowing eyes standing on a forest path, early sunlight streaming through the trees",
+                        "scene_id": 66333
+                    },
+                    {
+                        "scene": "They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air.",
+                        "imagePrompt": "a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky",
+                        "scene_id": 40604
+                    },
+                    {
+                        "scene": "At the center stood a hollow tree with a spiral staircase leading deep underground, its bark carved with glowing runes.",
+                        "imagePrompt": "an ancient hollow tree with glowing runes and a spiral staircase descending inside",
+                        "scene_id": 5356
+                    },
+                    {
+                        "scene": "Elara hesitated, then stepped into the tree, her heart pounding as the air shimmered around her.",
+                        "imagePrompt": "a girl entering a glowing tree with a magical aura, the inside illuminated by mysterious light",
+                        "scene_id": 60029
+                    },
+                    {
+                        "scene": "They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air.",
+                        "imagePrompt": "a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky",
+                        "scene_id": 66744
+                    }
+                ],
+                "story_id": 50800
+            },
+            "audios_list": [
+                "/home/magician/Documents/story_teller/output_audio_24901.wav",
+                "/home/magician/Documents/story_teller/output_audio_52727.wav",
+                "/home/magician/Documents/story_teller/output_audio_65457.wav",
+                "/home/magician/Documents/story_teller/output_audio_52212.wav",
+                "/home/magician/Documents/story_teller/output_audio_15624.wav",
+                "/home/magician/Documents/story_teller/output_audio_25693.wav"
+            ],
+            "render_images": [
+                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
+                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
+                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
+                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
+                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
+                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png"
+            ]
+        }
 
         const audio_input = document.getElementById("speaker_file_picker");
-        const upload_popup = document.getElementById("upload_audio");
-        const loader = document.getElementById("loading_animation");
+        const loader2 = document.getElementById("loading_animation");
         const generateText = document.getElementById("generate_text");
+        const progressBar = document.getElementById("video_progress");
+        const porgressMessage = document.getElementById("generation_output");
+        const next_page_btn = document.getElementById("next_");
+        const back_page_btn = document.getElementById("back_");
+
         let is_audios_genereted = false;
+        let video_output_path = null;
+        let video_progress = 0;
 
         let draft_story = null;
         const story_data = JSON.parse(localStorage.getItem('story_data'));
         draft_story = story_data.draft_story;
-
         console.log(story_data);
-
-        function open_upload_popup() {
-            if (is_audios_genereted) go_next();
-            else upload_popup.style.display = "block";
-        }
-
-        function close_upload_popup() {
-            upload_popup.style.display = "none";
-        }
-
-        function isValidAudioFile(file) {
-            if (!file) {
-                console.log("Not filfe")
-                return false;
-            }
-            const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg'];
-            console.log(file.type);
-            return allowedTypes.includes(file.type);
-        }
-
-        function upload_audio() {
-
-            loader.style.display = "block";
-            generateText.style.display = "none";
-            const file = audio_input.files[0];
-
-            if (isValidAudioFile(file)) {
-                if (upload_popup) upload_popup.style.display = "none";
-                is_audios_genereted = true;
-            } else {
-                alert("Please Select Speaker File Path First (Audio)...")
-            }
-            loader.style.display = "none";
+        
+        function enable_page_control_btn() {
+            loader2.style.display = "none";
             generateText.style.display = "flex";
+            next_page_btn.disabled = false;
+            next_page_btn.style.cursor = "pointer";
+            back_page_btn.disabled = false;
+            back_page_btn.style.cursor = "pointer";
         }
+        function disable_page_control_btn() {
+            loader2.style.display = "block";
+            generateText.style.display = "none";
+            next_page_btn.disabled = true;
+            next_page_btn.style.cursor = "not-allowed";
+            back_page_btn.disabled = true;
+            back_page_btn.style.cursor = "not-allowed";
+        }
+
+        function updateProgress(newProgress, message) {
+            newProgress = Math.min(100, Math.max(0, newProgress));
+            progressBar.style.transition = "width 0.5s ease-in-out";
+            progressBar.style.width = newProgress + "%";
+            video_progress = newProgress;
+            porgressMessage.innerText = message;
+        }
+        draft_story = content;
+
+        try{
+            regenerateVideo(draft_story.story_id, draft_story.render_images, draft_story.audios_list, draft_story.video_res )
+        } catch (error) {
+            enable_page_control_btn();
+            porgressMessage.innerText = `Error generating video ${error.message}`;
+            throw error;
+        }
+        
+        disable_page_control_btn();
+        const socket = io("http://127.0.0.1:8098");
+        socket.on("connect", () => { console.log("Connected to WebSocket server!")});
+        socket.on("video_progress", (data) => {
+            console.log(`Progress: ${data.progress}%`);
+            if (data.progress >= 99) {
+                socket.disconnect();
+                console.log("Socket disconnected.");
+                enable_page_control_btn();
+                porgressMessage.innerText = `Video has been saved in ${data.output}`;
+            }
+            updateProgress(data.progress, `Generate Video! Pleas Wait....`);
+        });
 
         function go_next() {
             window.location.href = 'image_render.html';
