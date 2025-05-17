@@ -23,3 +23,6 @@ export async function generateImage(story_id, scene_id) {
   return await window.api.call('model:generateImage', { story_id, scene_id });
 }
 
+export async function regenerateImage(story_id, scene_id) {
+  return await window.api.call('model:regenerateImage', { story_id, scene_id });
+}
