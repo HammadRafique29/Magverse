@@ -1,7 +1,7 @@
 const axios = require('axios');
 const { spawn } = require('child_process');
 
-const OLLAMA_URL = 'http://localhost:11434';
+const OLLAMA_URL = 'http://47.19.39.146:4984';
 const BEST_MODELS_PRIORITY = ["llama3", "gemma", "mistral", "llama2", "phi", "codellama", "qwen"];
 let CONTEXT = `CONTEXT HERE`;
 
@@ -124,9 +124,9 @@ A shadowy figure watched from the edge of a stone bridge, its eyes glowing faint
         // const bestModel = await selectBestModel(localModels);   
         // console.log("Best Model:", bestModel);
 
-        // const res = await sendChatPrompt(bestModel, "Provde story of pandas of length 20 minute", CONTEXT);
-        // console.log("Ollama Language Model Response: ", res);
-        return temp_scenes;
+        const res = await sendChatPrompt("llama3:latest", "Provde story of pandas of length 20 minute", CONTEXT);
+        console.log("Ollama Language Model Response: ", res);
+        return res;
         
     } catch (err) {
         console.error("Error:", err.message);
