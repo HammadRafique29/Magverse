@@ -80,7 +80,7 @@
     <script type="module">
 
         import { generate_scenes, refresh_scene, update_scene, get_story } from './scripts/scenes.js';
-        import { generate_image } from './scripts/images.js'
+        import { generate_image, regenerate_image } from './scripts/images.js'
 
         const redering_image_container = document.getElementById("redering_image_container");
         const hidden_story_id_ = document.getElementById("hidden_story_id_");
@@ -126,7 +126,7 @@
         }
         
         // Handle Scenes Interaction: Update, Refresh
-        async function handleSceneInteraction(button, isRefresh) {
+        async function handleSceneInteraction(button, isRefresh, RegenerateImage) {
             const sceneId = button.getAttribute('data-scene-id');
             const storyId = button.getAttribute('data-story-id');
             const container = document.getElementById(`scene_${sceneId}`);
@@ -138,26 +138,46 @@
             const originalValue = textarea.value;
             if (isRefresh) textarea.value = "";
             disable_page_control_btn();
-            showOverlay(overlay, content);
+            RegenerateImage? null : showOverlay(overlay, content);
             try {
-                const response = isRefresh
+                if (RegenerateImage) {
+                    const image_render_src = document.getElementById(`render_image_src_${sceneId}`);
+                    const scene_loader = document.getElementById(`custom_loader_${sceneId}`);
+
+                    image_render_src.style.display = "none";
+                    scene_loader.style.display = "flex";
+
+                    disable_page_control_btn();
+
+                    let res_img_path = await regenerate_image(storyId, sceneId);
+
+                    console.log(`Regenerate Response ${sceneId}: `, res_img_path)
+                    scene_loader.style.display = "none";
+                    image_render_src.src = res_img_path;
+                    image_render_src.style.display = "flex";
+                    rendered_images_list.push(res_img_path);
+                    enable_page_control_btn();
+                } else {
+                    const response = isRefresh
                     ? await refresh_scene(storyId, sceneId)
                     : await update_scene(storyId, sceneId, textarea.value);
 
                 setTimeout(() => {
                     if (!response) {
-                        alert(`Failed to ${isRefresh ? "refresh" : "update"} scene. Please try again.`);
-                        console.error(`Failed to ${isRefresh ? "refresh" : "update"} scene`);
-                        if (isRefresh) textarea.value = originalValue;
-                    } else {
-                        textarea.value = response.scene;
-                        hiddenInput.value = response.imagePrompt;
-                    }
-                    hideOverlay(overlay, content);
-                }, 1500 + Math.random() * 1000);
+                            alert(`Failed to ${RegenerateImage? "Re-generate" : isRefresh ? "refresh" : "update"} scene. Please try again.`);
+                            console.error(`Failed to ${RegenerateImage? "Re-generate" : isRefresh ? "refresh" : "update"} scene`);
+                            if (isRefresh) textarea.value = originalValue;
+                        } else {
+                            textarea.value = response.scene;
+                            hiddenInput.value = response.imagePrompt;
+                        }
+                        RegenerateImage? null : hideOverlay(overlay, content);
+                        
+                    }, 1500 + Math.random() * 1000);
+                } 
             } catch (err) {
                 console.error(err);
-                hideOverlay(overlay, content);
+                RegenerateImage? null : hideOverlay(overlay, content);
             }
         }
 
@@ -287,8 +307,9 @@
                 redering_image_container.addEventListener('click', async (event) => {
                     const target = event.target.closest('button');
                     if (!target) return;
-                    if (target.classList.contains('refresh_prompt_btn_')) await handleSceneInteraction(target, true);
-                    else if (target.classList.contains('update_prompt_btn_')) await handleSceneInteraction(target, false);
+                    if (target.classList.contains('refresh_prompt_btn_')) await handleSceneInteraction(target, true, false);
+                    else if (target.classList.contains('update_prompt_btn_')) await handleSceneInteraction(target, false, false);
+                    else if (target.classList.contains('re-generate_image_')) await handleSceneInteraction(target, false, true);
                 });
             }
             document.getElementById('next_').addEventListener('click', async () => {
