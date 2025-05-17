@@ -1,12 +1,10 @@
 
 const ollama_model = require('../scripts/ollama_');
 const { generateSpeechWithSpeaker } = require('../scripts/docker_tts');
-
-
 let stories_database = {};
 
-// Helper function to parse scenes text.
-// getSceneId is a function that returns the scene_id for each parsed scene.
+
+
 function parseScenes(text, getSceneId) {
   return text
     .split("\n")
@@ -130,6 +128,29 @@ exports.transcribeScene = async (event, args) => {
 
 
 exports.generateImage = async (event, args) => {
+  return new Promise((resolve) => {
+    setTimeout(async () => {
+      const { story_id, scene_id, speaker_path } = args;
+
+      if (!stories_database[story_id]) {
+        console.log("Story not found");
+        resolve(null);
+        return;
+      }
+      const scenesArray = stories_database[story_id].scenes;
+      const index = scenesArray.findIndex(scene => scene.scene_id == scene_id);
+      if (index === -1) {
+        console.log("Scene not found");
+        resolve(null);
+        return;
+      }
+      resolve("/home/magician/Desktop/story_teller/assets/img/renderd_img.png");
+    }, 2000);
+  });
+};
+
+
+exports.regenerateImage = async (event, args) => {
   return new Promise((resolve) => {
     setTimeout(async () => {
       const { story_id, scene_id, speaker_path } = args;
