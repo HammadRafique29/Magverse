@@ -9,6 +9,7 @@ module.exports = function setupRoutes(ipcMain) {
   ipcMain.handle('model:getStory', modelRoute.getStory);
   ipcMain.handle('model:transcribeScene', modelRoute.transcribeScene);
   ipcMain.handle('model:generateImage', modelRoute.generateImage);
+  ipcMain.handle('model:regenerateImage', modelRoute.regenerateImage);
   ipcMain.handle('dialog:pickFile', async () => {
     return await dialog.showOpenDialog({
       properties: ['openFile'],
