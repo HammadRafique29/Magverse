@@ -6,16 +6,17 @@ const image = 'ghcr.io/coqui-ai/tts';
 const outputAudio = path.resolve(__dirname, 'output.wav');
 const default_container_name = "ai-video-generator-tts";
 
+
 function dockerContainerExists(containerName) {
-    try {
-      const output = execSync(`docker ps -a --format "{{.Names}}"`).toString();
-      const containers = output.split('\n').map(name => name.trim());
-      return containers.includes(containerName);
-    } catch (err) {
-      console.error(`Error checking container existence: ${err.message}`);
-      return false;
-    }
+  try {
+    const output = execSync(`docker ps -a --format "{{.Names}}"`).toString();
+    const containers = output.split('\n').map(name => name.trim());
+    return containers.includes(containerName);
+  } catch (err) {
+    console.error(`Error checking container existence: ${err.message}`);
+    return false;
   }
+}
 
 
 /**
@@ -34,48 +35,25 @@ function generateSpeechWithSpeaker(text, speakerAudioPath) {
     if (!imageExists) {
       execSync(`docker pull ${image}`, { stdio: 'inherit' });
     }
-
     // Check speaker WAV file exists
     if (!fs.existsSync(speakerWavPath)) {
       return 'Error: Speaker WAV file does not exist.';
     }
-
     // Remove previous output
     if (fs.existsSync(outputAudio)) {
       fs.unlinkSync(outputAudio);
     }
-
     // Normalize paths for volume mount
     const localDir = path.dirname(speakerWavPath);
     const speakerFileName = path.basename(speakerWavPath);
-    let command = "";
 
-    // if (!dockerContainerExists(default_container_name)) {
-    //     // Create and run a new container with a name
-    //     command = `
-    //       docker run --name ${default_container_name} --rm \
-    //         -v ${localDir}:/data \
-    //         ${image} \
-    //         --text "${text}" \
-    //         --speaker_wav /data/${speakerFileName} \
-    //         --out_path /data/output.wav`;
-    //   } else {
-    //     // Use existing container to run the TTS command
-    //     command = `
-    //       docker exec ${default_container_name} \
-    //         tts \
-    //         --text "${text}" \
-    //         --speaker_wav /data/${speakerFileName} \
-    //         --out_path /data/output.wav`;
-    //   }
-
-      command = `
-          docker run --name ${default_container_name} --rm \
-            -v ${localDir}:/data \
-            ${image} \
-            --text "${text}" \
-            --speaker_wav /data/${speakerFileName} \
-            --out_path /data/output.wav`;
+    let command = `
+        docker run --name ${default_container_name} --rm \
+          -v ${localDir}:/data \
+          ${image} \
+          --text "${text}" \
+          --speaker_wav /data/${speakerFileName} \
+          --out_path /data/output.wav`;
 
     execSync(command, { stdio: 'inherit' });
     
@@ -87,6 +65,12 @@ function generateSpeechWithSpeaker(text, speakerAudioPath) {
     return `Error: ${err.message}`;
   }
 }
+
+
+
+
+
+
 
 module.exports = { generateSpeechWithSpeaker };
 
