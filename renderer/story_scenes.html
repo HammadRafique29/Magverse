@@ -95,14 +95,14 @@
                             <div class="spinner_circle"></div>
                         </div>
 
-                        <div class="scene_content_" style="display: none;height: 200px;">
+                        <div class="scene_content_" style="display: none;height: clamp(100px, 27vh, 200px);">
                             <div class="scene_ids_">Scene${index + 1}</div>
                             <div class="scene_prompt_">
                                 <textarea class="scene_prompt_textarea" name="scene_output_${sceneId}" id="scene_output_${sceneId}" cols="30"></textarea>
                             </div>
                             <div class="scenes_controls_">
                                 <button type="button" class="refresh_prompt_btn_" data-story-id="${storyId}" data-scene-id="${sceneId}">
-                                    <img src="../assets/img/refresh.png" width="30" height="30" alt="">
+                                    <img src="../assets/img/refresh.png" width="20vw" height="20vw" alt="">
                                 </button>
                                 <button class="update_prompt_btn_" data-story-id="${storyId}" data-scene-id="${sceneId}">Update</button>
                             </div>
