@@ -131,6 +131,55 @@ exports.updateScene = async (event, args) => {
 };
 
 
+
+exports.refreshImagePrompt = async (event, args) => {
+  const { story_id, scene_id } = args;
+  try {
+    if (!stories_database[story_id]) {
+      console.log("Story not found");
+      throw new Error(`Story not found with ID ${story_id}`);
+    }
+    const scenesArray = stories_database[story_id].scenes;
+    const index = scenesArray.findIndex(scene => scene.scene_id == scene_id);
+    if (index === -1) {
+      throw new Error(`Scene not found with ID ${scene_id}`);
+    }
+    const target_scene = scenesArray[index];
+    const refresh_scene_text = await py_refresh_scene(stories_database[story_id].scenes, target_scene);
+    const updatedScene = parseScenes(refresh_scene_text, target_scene.scene_id)[0];
+    stories_database[story_id].scenes[index] = updatedScene;
+    return updatedScene;
+
+  } catch (error) {
+    throw error;
+  }  
+};
+
+exports.updateImagePrompt = async (event, args) => {
+  const { story_id, scene_id, new_scene } = args;
+  try {
+    if (!stories_database[story_id]) {
+        console.log("Story not found");
+        throw new Error(`Story not found with ID ${story_id}`);
+    }
+    const scenesArray = stories_database[story_id].scenes;
+    const index = scenesArray.findIndex(scene => scene.scene_id == scene_id);
+    if (index === -1) {
+        throw new Error(`Scene not found with ID ${scene_id}`);
+    }
+    const target_scene = scenesArray[index];
+    const refresh_scene_text = await py_update_scene(target_scene.imagePrompt, new_scene);
+    const updatedScene = parseScenes(refresh_scene_text, target_scene.scene_id)[0];
+    stories_database[story_id].scenes[index] = updatedScene;
+    return updatedScene;
+    
+  } catch (error) {
+      throw error;
+  } 
+};
+
+
+
 exports.transcribeScene = async (event, args) => {
   return new Promise((resolve) => {
     setTimeout(async () => {

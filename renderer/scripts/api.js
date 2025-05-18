@@ -12,6 +12,14 @@ export async function updateScene(story_id, scene_id, new_scene) {
   return await window.api.call('model:updateScene', { story_id, scene_id, new_scene });
 }
 
+export async function refreshImagePrompt(story_id, scene_id) {
+  return await window.api.call('model:refreshImagePrompt', { story_id, scene_id });
+}
+
+export async function updateImagePrompt(story_id, scene_id, new_scene) {
+  return await window.api.call('model:updateImagePrompt', { story_id, scene_id, new_scene });
+}
+
 export async function getStory(story_id) {
   return await window.api.call('model:getStory', { story_id });
 }
