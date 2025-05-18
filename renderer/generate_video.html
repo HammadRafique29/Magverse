@@ -48,7 +48,7 @@
 
         /* Content Styles */
         #message p {
-            font-size: 7vh;
+            font-size: 4vw;
             color: white;
             font-weight: bold;
         }
@@ -87,16 +87,20 @@
         /* Button Styles */
         #back_ {
             background-color: rgba(128, 128, 128, 0.308);
-            width: 45%;
-            height: 100%;
+            width: 15vw;
+            height: 7vh;
+            max-width: 200px;
+            font-size: clamp(12px, 2vw, 28px);
         }
 
         #next_ {
             display: flex;
             align-items: center;
             column-gap: 5px;
-            width: 35%;
-            height: 100%;
+            width: auto;
+            max-width: 200px;
+            font-size: clamp(12px, 2vw, 28px);
+            height: 7vh;
             justify-content: center;
         }
 
