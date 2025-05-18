@@ -52,10 +52,10 @@ function parseScenes(text, scene_id) {
       const match = line.match(/^(.*?)\s*\((.*?)\)$/);
       if (match) {
         return {
-          scene: match[1].trim(),
-          imagePrompt: match[2].trim(),
-          scene_id: scene_id
-        };
+              scene: match[1].trim(),
+              imagePrompt: match[2].trim(),
+              scene_id: typeof scene_id === 'function' ? scene_id() : scene_id
+            };
       }
       return null;
     })
@@ -72,9 +72,10 @@ exports.generateScenes = async (event, args) => {
   try {
     // const scenes = await ollama_model.generate_scenes();
     console.log(prompt, duration);
-    // const scenes = await py_generate_scenes(prompt, duration);
-    // const result = parseScenes(scenes, Math.floor(Math.random() * 99999));
-    const result = test_results
+    const scenes = await py_generate_scenes(prompt, duration);
+    const result = parseScenes(scenes, () => Math.floor(Math.random() * 99999));
+    // const result = test_results
+    console.log(result)
     const story_id = Math.floor(Math.random() * 99999);
     stories_database[story_id] = { scenes: result, story_id };
     return { scenes: result, story_id };

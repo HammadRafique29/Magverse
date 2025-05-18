@@ -201,7 +201,7 @@
                     const { scene_id: sceneId, scene: sceneText, imagePrompt } = scene;
                     
                     try {
-                        const audio_file_path = "/home/magician/Documents/story_teller/output_audio_24901.wav" // await transcribeScene(story_data.story_id, sceneId, filePath);
+                        const audio_file_path = await transcribeScene(story_data.story_id, sceneId, filePath);
                         generated_audios_path.push(audio_file_path)
                         updateProgress(((index + 1) / story_data.draft_story.scenes.length) * 100, `Transcribing Scene ${index + 1}`);
                     } catch (error) {
