@@ -54,6 +54,65 @@
 
         const rendered_images_list = [];
         let video_resolution = [];
+        let story_data = null;
+
+        story_data = {
+            "prompt": "aksjdasd",
+            "video_dur": "5",
+            "video_res": "1280x720",
+            "story_id": "50800",
+            "draft_story": {
+                "scenes": [
+                    {
+                        "scene": "Morning mist curled around the roots of ancient trees as a young girl named Elara wandered deeper into the heart of the forest, drawn by a melody only she could hear.",
+                        "imagePrompt": "a young girl walking through a misty magical forest with ancient trees and soft morning light",
+                        "scene_id": 5469
+                    },
+                    {
+                        "scene": "A fox with silver fur and wise eyes appeared before her, motioning with its head as if to say, “Follow me.”",
+                        "imagePrompt": "a silver-furred fox with glowing eyes standing on a forest path, early sunlight streaming through the trees",
+                        "scene_id": 66333
+                    },
+                    {
+                        "scene": "They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air.",
+                        "imagePrompt": "a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky",
+                        "scene_id": 40604
+                    },
+                    {
+                        "scene": "At the center stood a hollow tree with a spiral staircase leading deep underground, its bark carved with glowing runes.",
+                        "imagePrompt": "an ancient hollow tree with glowing runes and a spiral staircase descending inside",
+                        "scene_id": 5356
+                    },
+                    {
+                        "scene": "Elara hesitated, then stepped into the tree, her heart pounding as the air shimmered around her.",
+                        "imagePrompt": "a girl entering a glowing tree with a magical aura, the inside illuminated by mysterious light",
+                        "scene_id": 60029
+                    },
+                    {
+                        "scene": "They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air.",
+                        "imagePrompt": "a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky",
+                        "scene_id": 66744
+                    }
+                ],
+                "story_id": 50800
+            },
+            "audios_list": [
+                "/home/magician/Documents/story_teller/output_audio_24901.wav",
+                "/home/magician/Documents/story_teller/output_audio_52727.wav",
+                "/home/magician/Documents/story_teller/output_audio_65457.wav",
+                "/home/magician/Documents/story_teller/output_audio_52212.wav",
+                "/home/magician/Documents/story_teller/output_audio_15624.wav",
+                "/home/magician/Documents/story_teller/output_audio_25693.wav"
+            ],
+            "render_images": [
+                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
+                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
+                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
+                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
+                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
+                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png"
+            ]
+        }
 
         function enable_page_control_btn() {
             loader2.style.display = "none";
@@ -99,6 +158,7 @@
             const content = container.querySelector('.scene_content_');
             const textarea = container.querySelector(`#scene_output_${sceneId}`);
             const hiddenInput = container.querySelector(`#hidden_image_prompt_${sceneId}`);
+            const error_message = document.getElementById(`error_scene_prompt_${sceneId}`);
 
             const originalValue = textarea.value;
             if (isRefresh) textarea.value = "";
@@ -113,6 +173,7 @@
                     scene_loader.style.display = "flex";
 
                     disable_page_control_btn();
+                    error_message.style.display = "none";
                     
 
                     let res_img_path = await regenerateImage(storyId, sceneId, video_resolution[0], video_resolution[1]);
@@ -134,6 +195,7 @@
                             console.error(`Failed to ${RegenerateImage? "Re-generate" : isRefresh ? "refresh" : "update"} scene`);
                             if (isRefresh) textarea.value = originalValue;
                         } else {
+                            textarea.style.display = "none";
                             textarea.value = response.scene;
                             hiddenInput.value = response.imagePrompt;
                         }
@@ -143,7 +205,34 @@
                 } 
             } catch (err) {
                 console.error(err);
+                textarea.style.display = "none";
+                error_message.style.display = "flex";
+                error_message.innerText = `Failed to generte content. Try Again\n${err}`
                 RegenerateImage? null : hideOverlay(overlay, content);
+            }
+        }
+
+
+        function play_transcribed_audio(button) {
+            const sceneId = button.getAttribute('data-scene-id');
+            const storyId = button.getAttribute('data-story-id');
+            var audio = document.getElementById(`transcribed_audio_${sceneId}`);
+            var play_ico = document.getElementById(`play_audio_img_${sceneId}`);
+            var pause_ico = document.getElementById(`pause_audio_img_${sceneId}`);
+            const isPlaying = audio.getAttribute('data-isPlaying');
+
+            if (isPlaying === "true") {
+                audio.pause();
+                audio.currentTime = 0;
+                play_ico.style.display = "block";
+                pause_ico.style.display = "none"
+                // pause_ico.disabled = true;
+                audio.setAttribute("data-isPlaying", "false");
+            } else {
+                audio.play();
+                play_ico.style.display = "none";
+                pause_ico.style.display = "block";
+                audio.setAttribute("data-isPlaying", "true");
             }
         }
 
@@ -167,6 +256,9 @@
                         <div class="scene_content_" style="display: none;height: clamp(100px, 20vh, 200px);">
                             <div class="scene_ids_">Scene${index+1}</div>
                             <div class="scene_prompt_">
+                                <div id="error_scene_prompt_${sceneId}" style="height:90%;width:90%;display:flex;justify-content:center;align-items:center;color:gray;display:none">
+                                    Failed To Generate Content    
+                                </div>
                                 <textarea class="scene_prompt_textarea" name="scene_output_${sceneId}" id="scene_output_${sceneId}" cols="30">${sceneText}</textarea>
                                 </textarea>
                             </div>
@@ -174,6 +266,13 @@
                                 <button type="button" class="refresh_prompt_btn_" data-story-id="${storyId}" data-scene-id="${sceneId}">
                                     <img src="../assets/img/refresh.png" width="20vw" height="20vw"
                                         style="background-color:transparent;" alt="" srcset="">
+                                </button>
+                                <audio id="transcribed_audio_${sceneId}" src="${story_data.audios_list[index]}" data-isPlaying="false" preload="auto"></audio>
+                                <button type="button" class="play_pause_audio" data-story-id="${storyId}" data-scene-id="${sceneId}" style="background-color: transparent;outline: none;border: none;">
+                                    <img id="play_audio_img_${sceneId}"  src="../assets/img/play.png" width="20vw" height="20vw"
+                                        style="background-color:transparent;" alt="" srcset="">
+                                    <img id="pause_audio_img_${sceneId}" src="../assets/img/pause.png" width="20vw" height="20vw"
+                                        style="background-color:transparent;display:none" alt="" srcset="">
                                 </button>
                                 <button id="update_prompt_${sceneId}"  data-story-id="${storyId}" data-scene-id="${sceneId}" class="update_prompt_btn_">Update</button>
                                 <input type="hidden" id="hidden_image_prompt_${sceneId}" data-story-id="${storyId}" data-scene-id="${sceneId}" value="${imagePrompt}">
@@ -219,7 +318,7 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             
-            const story_data = JSON.parse(localStorage.getItem('story_data'));
+            // story_data = JSON.parse(localStorage.getItem('story_data'));
             let draft_story = story_data.draft_story;
             let old_render_images = story_data.render_images;
             video_resolution = story_data.video_res.split("x")
@@ -240,6 +339,7 @@
                     if (target.classList.contains('refresh_prompt_btn_')) await handleSceneInteraction(target, true, false);
                     else if (target.classList.contains('update_prompt_btn_')) await handleSceneInteraction(target, false, false);
                     else if (target.classList.contains('re-generate_image_')) await handleSceneInteraction(target, false, true);
+                    else if (target.classList.contains('play_pause_audio')) play_transcribed_audio(target);
                 });
             }
             document.getElementById('next_').addEventListener('click', async () => {
