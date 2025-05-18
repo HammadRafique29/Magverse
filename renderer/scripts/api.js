@@ -1,5 +1,6 @@
 
 export async function generateScenes(prompt, duration) {
+  console.log(`Here ${prompt} ${duration}` )
   return await window.api.call('model:generateScenes', { prompt, duration });
 }
 

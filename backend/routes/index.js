@@ -2,7 +2,6 @@ const modelRoute = require('./model');
 const { ipcMain, dialog } = require('electron');
 
 module.exports = function setupRoutes(ipcMain) {
-  ipcMain.handle('model:getMessage', modelRoute.getMessage);
   ipcMain.handle('model:generateScenes', modelRoute.generateScenes);
   ipcMain.handle('model:refreshScene', modelRoute.refreshScene);
   ipcMain.handle('model:updateScene', modelRoute.updateScene);
