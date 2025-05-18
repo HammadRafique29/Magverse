@@ -35,7 +35,7 @@
     </div>
 
     <script type="module">
-        import { generate_scenes, refresh_scene, update_scene, get_story } from './scripts/scenes.js';
+        import { generateScenes, refreshScene, updateScene, getStory } from './scripts/api.js';
 
         window.addEventListener('DOMContentLoaded', async () => {
             const ai_generated_scenes = document.getElementById("AI_generated_scenes");
@@ -74,7 +74,7 @@
                 let test_scenes = null;
                 const story_data = JSON.parse(localStorage.getItem('story_data'));
                 const draft_story = JSON.parse(localStorage.getItem('story_data'));            
-                test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generate_scenes(story_data.prompt, story_data.duration);
+                test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generateScenes(story_data.prompt, story_data.video_dur);
             }
 
             // Render Scenes From API Fetched Data
@@ -151,8 +151,8 @@
                 showOverlay(overlay, content);
                 try {
                     const response = isRefresh
-                        ? await refresh_scene(storyId, sceneId)
-                        : await update_scene(storyId, sceneId, textarea.value);
+                        ? await refreshScene(storyId, sceneId)
+                        : await updateScene(storyId, sceneId, textarea.value);
 
                     setTimeout(() => {
                         if (!response) {
@@ -190,7 +190,7 @@
 
             // Goto Next Page: Generate Audio
             async function generate_audio_page() {
-                const updated_story_data = await get_story(hidden_story_id_.value);
+                const updated_story_data = await getStory(hidden_story_id_.value);
                 localStorage.setItem('story_data', JSON.stringify({
                         prompt: story_data.prompt,
                         video_dur: story_data.video_dur,
@@ -206,7 +206,7 @@
             const story_data = JSON.parse(localStorage.getItem('story_data'));
             const draft_story = JSON.parse(localStorage.getItem('story_data'));
             console.log(draft_story);
-            test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generate_scenes(story_data.prompt, story_data.duration);
+            test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generateScenes(story_data.prompt, story_data.video_dur);
             totalScenesFound = test_scenes.scenes.length;
             
             if (story_data) {

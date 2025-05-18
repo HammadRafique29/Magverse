@@ -23,45 +23,7 @@
 
         <input type="text" name="hidden_" id="hidden_story_id_" style="display: none;">
 
-        <div id="redering_image_container">
-            <div class="rendered_image_">
-
-                <div class="rendered_image_container">
-                    <img src="../assets/img/renderd_img.png" alt="" srcset="">
-                    <span class="custom-loader"></span>
-                </div>
-
-                <div class="rendered_image_details_container">
-                    <div id="scene_2" class="generated_scenes_">
-                        <div class="scene_ids_">Scene1</div>
-                        <div class="scene_prompt_">
-                            <textarea class="scene_prompt_textarea" name="scene_output_1" id="scene_output_1" cols="30">Once we get the prompts, we will save it into google sheets, you're BG  friend will look into them and select the best scenes. Than he will copy & paste then text-to-image or video prompts to generate the  content.
-                            </textarea>
-                        </div>
-                        <div class="scenes_controls_">
-                            <button type="button" class="refresh_prompt_btn_">
-                                <img src="../assets/img/refresh.png" width="20vw" height="20vw"
-                                    style="background-color:transparent;" alt="" srcset="">
-                            </button>
-                            <button id="update_prompt" class="update_prompt_btn_">Update</button>
-                        </div>
-                    </div>
-
-                    <div class="image_generation_settings_">
-                        <button type="button" class="re-generate_image_ render_image_style_">
-                            Re-generate Image
-                        </button>
-                        <select class="image_resolution_ render_image_style_">
-                            <option>720 x 1080</option>
-                            <option>1080 x 1920</option>
-                            <option>1920 x 1080</option>
-                        </select>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
+        <div id="redering_image_container"></div>
 
         <div class="bottom_controls">
             <button onclick="history.back()" class="page_control_" id="back_">
@@ -80,7 +42,8 @@
     <script type="module">
 
         import { generate_scenes, refresh_scene, update_scene, get_story } from './scripts/scenes.js';
-        import { generate_image, regenerate_image } from './scripts/images.js'
+        // import { generate_image, regenerate_image } from './scripts/images.js'
+        import { generateImage, regenerateImage } from './scripts/api.js'
 
         const redering_image_container = document.getElementById("redering_image_container");
         const hidden_story_id_ = document.getElementById("hidden_story_id_");
@@ -88,7 +51,9 @@
         const generateText = document.getElementById("generate_text");
         const next_page_btn = document.getElementById("next_");
         const back_page_btn = document.getElementById("back_");
+
         const rendered_images_list = [];
+        let video_resolution = [];
 
         function enable_page_control_btn() {
             loader2.style.display = "none";
@@ -148,8 +113,9 @@
                     scene_loader.style.display = "flex";
 
                     disable_page_control_btn();
+                    
 
-                    let res_img_path = await regenerate_image(storyId, sceneId);
+                    let res_img_path = await regenerateImage(storyId, sceneId, video_resolution[0], video_resolution[1]);
 
                     console.log(`Regenerate Response ${sceneId}: `, res_img_path)
                     scene_loader.style.display = "none";
@@ -240,7 +206,7 @@
             const image_render_src = document.getElementById(`render_image_src_${scene_id}`);
             const scene_loader = document.getElementById(`custom_loader_${scene_id}`);
 
-            let res_img_path = !old_render_image? await generate_image(story_id, scene_id) : old_render_image;
+            let res_img_path = !old_render_image? await generateImage(story_id, scene_id, video_resolution[0], video_resolution[1]) : old_render_image;
             console.log(`Response ${scene_id}: `, res_img_path)
             scene_loader.style.display = "none";
             image_render_src.src = res_img_path;
@@ -256,43 +222,7 @@
             const story_data = JSON.parse(localStorage.getItem('story_data'));
             let draft_story = story_data.draft_story;
             let old_render_images = story_data.render_images;
-
-            const story_data_ = {
-                "scenes": [
-                    {
-                        "scene": "Ollama Morning mist curled around the roots of ancient trees as a young girl named Elara wandered deeper into the heart of the forest, drawn by a melody only she could hear.",
-                        "imagePrompt": "a young girl walking through a misty magical forest with ancient trees and soft morning light",
-                        "scene_id": 43625
-                    },
-                    {
-                        "scene": "Ollama A fox with silver fur and wise eyes appeared before her, motioning with its head as if to say, “Follow me.”",
-                        "imagePrompt": "a silver-furred fox with glowing eyes standing on a forest path, early sunlight streaming through the trees",
-                        "scene_id": 3957
-                    },
-                    {
-                        "scene": "Ollama They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air.",
-                        "imagePrompt": "a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky",
-                        "scene_id": 87809
-                    },
-                    {
-                        "scene": "Ollama At the center stood a hollow tree with a spiral staircase leading deep underground, its bark carved with glowing runes.",
-                        "imagePrompt": "an ancient hollow tree with glowing runes and a spiral staircase descending inside",
-                        "scene_id": 42199
-                    },
-                    {
-                        "scene": "Ollama Elara hesitated, then stepped into the tree, her heart pounding as the air shimmered around her.",
-                        "imagePrompt": "a girl entering a glowing tree with a magical aura, the inside illuminated by mysterious light",
-                        "scene_id": 28725
-                    },
-                    {
-                        "scene": "Ollama They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air.",
-                        "imagePrompt": "a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky",
-                        "scene_id": 44288
-                    }
-                ],
-                "story_id": 61355
-            }
-
+            video_resolution = story_data.video_res.split("x")
             console.log('story_data', story_data);
             disable_page_control_btn()
 

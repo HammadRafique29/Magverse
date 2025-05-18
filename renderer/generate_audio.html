@@ -84,7 +84,8 @@
 
     <script type="module">
         import { generate_scenes, refresh_scene, update_scene, get_story } from './scripts/scenes.js';
-        import { transcribe_scene } from './scripts/audio.js';
+        // import { transcribe_scene } from './scripts/audio.js';
+        import { transcribeScene } from './scripts/api.js';
 
         const audio_input = document.getElementById("speaker_file_picker");
         const upload_popup = document.getElementById("upload_audio");
@@ -200,16 +201,13 @@
                     const { scene_id: sceneId, scene: sceneText, imagePrompt } = scene;
                     
                     try {
-                        const audio_file_path = "/home/magician/Documents/story_teller/output_audio_24901.wav" // await transcribe_scene(story_data.story_id, sceneId, filePath);
-                        console.log("Transcription Result:", audio_file_path);
+                        const audio_file_path = "/home/magician/Documents/story_teller/output_audio_24901.wav" // await transcribeScene(story_data.story_id, sceneId, filePath);
                         generated_audios_path.push(audio_file_path)
                         updateProgress(((index + 1) / story_data.draft_story.scenes.length) * 100, `Transcribing Scene ${index + 1}`);
                     } catch (error) {
                         updateProgress(0, `Error transcribing scene ${index + 1}: ${error.message}`);
                         enable_page_control_btn();
                     }
-                    
-                
                 }
             }
             
