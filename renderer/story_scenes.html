@@ -23,7 +23,7 @@
         <div id="AI_generated_scenes">
             <div id="fetching_request_loader" style="width: 90%;height:40%; display:flex;justify-content: center;align-items: center;flex-direction: column;row-gap: 20px;">
                 <span id="custom_loader_" class="custom-loader"></span>
-                <img id="custom_loader_error_icon" src="../assets/img/server.png" alt="Animated GIF" style="width:10vw;height:10vw;">
+                <img id="custom_loader_error_icon" src="../assets/img/server.png" alt="Animated GIF" style="width:10vw;height:10vw;display: none;">
                 <span id="custom_loader_error_message" style="color: red;font-size: 1vw;"></span>
             </div>
         </div>
@@ -222,6 +222,7 @@
             try {
                 custom_loader_.style.display = "flex"
                 test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generateScenes(story_data.prompt, story_data.video_dur); 
+                document.getElementById("fetching_request_loader").style.display = "none";
                 
             } catch (error) {
                 custom_loader_error.style.display = "block";

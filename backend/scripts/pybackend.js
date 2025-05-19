@@ -8,7 +8,7 @@ const image = 'ghcr.io/coqui-ai/tts';
 const outputAudio = path.resolve(__dirname, 'output.wav');
 const default_container_name = "ai-video-generator-tts";
 
-const PY_SERVER_URL = "http://192.168.8.100:8098"
+const PY_SERVER_URL = "http://localhost:8098"
 
 async function py_generate_scenes(story_idea, duration) {
   const res = await fetch(`${PY_SERVER_URL}/generate-scenes`, {
@@ -68,73 +68,38 @@ async function py_update_scene(image_prompt, update_scene) {
 
 
 
-async function pythontranscribeScene(text, speakerAudioFile) {
-  const controller = new AbortController();
-  const timeoutMs = 530000;
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const formData = new FormData();
-    formData.append("text", text);
-    formData.append("speaker", speakerAudioFile);
-
-    const res = await fetch(`${PY_SERVER_URL}/transcribe-text`, {
-      method: "POST",
-      body: formData,
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(`Server returned error: ${res.status} - ${res.statusText} - ${errText}`);
-    }
-
-    const buffer = await res.arrayBuffer();
-    const uniqueName = `output_audio_${Date.now()}_${Math.floor(Math.random() * 10000)}.wav`;
-
-    const userDocs = getUserDocuments();
-    const targetDir = path.join(userDocs, "story_teller");
-    if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
-
-    const fullPath = path.join(targetDir, uniqueName);
-    fs.writeFileSync(fullPath, Buffer.from(buffer));
-    return fullPath;
-
-  } catch (error) {
-    clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
-      console.error('Request timed out');
-      throw new Error('Transcription request timed out');
-    }
-    console.error("Fetch Error:", error.message);
-    throw error;
-  }
-}
-
-
-// async function pythontranscribeScene(text, speakerAudioPath) {
+// async function pythontranscribeScene(text, speakerAudioFile) {
 //   const controller = new AbortController();
 //   const timeoutMs = 530000;
 //   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
 //   try {
+//     const formData = new FormData();
+//     formData.append("text", text);
+//     formData.append("speaker", speakerAudioFile);
+
 //     const res = await fetch(`${PY_SERVER_URL}/transcribe-text`, {
 //       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({
-//         text,
-//         speaker: speakerAudioPath,
-//       }),
+//       body: formData,
 //       signal: controller.signal,
 //     });
+
 //     clearTimeout(timeoutId);
-//     if (!res.ok) throw new Error(`Server returned error: ${res.status} - ${res.statusText} - ${res.json()['error']}`);
-//     const responseData = await res.json();
-//     if (responseData.status !== "success") throw new Error(`Error from API: ${responseData.error}`);
-//     return responseData.data.audio;
+//     if (!res.ok) {
+//       const errText = await res.text();
+//       throw new Error(`Server returned error: ${res.status} - ${res.statusText} - ${errText}`);
+//     }
+
+//     const buffer = await res.arrayBuffer();
+//     const uniqueName = `output_audio_${Date.now()}_${Math.floor(Math.random() * 10000)}.wav`;
+
+//     const userDocs = getUserDocuments();
+//     const targetDir = path.join(userDocs, "story_teller");
+//     if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+
+//     const fullPath = path.join(targetDir, uniqueName);
+//     fs.writeFileSync(fullPath, Buffer.from(buffer));
+//     return fullPath;
 
 //   } catch (error) {
 //     clearTimeout(timeoutId);
@@ -146,6 +111,41 @@ async function pythontranscribeScene(text, speakerAudioFile) {
 //     throw error;
 //   }
 // }
+
+
+async function pythontranscribeScene(text, speakerAudioPath) {
+  const controller = new AbortController();
+  const timeoutMs = 530000;
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(`${PY_SERVER_URL}/transcribe-text`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text,
+        speaker: speakerAudioPath,
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) throw new Error(`Server returned error: ${res.status} - ${res.statusText} - ${res.json()['error']}`);
+    const responseData = await res.json();
+    if (responseData.status !== "success") throw new Error(`Error from API: ${responseData.error}`);
+    return responseData.data.audio;
+
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      console.error('Request timed out');
+      throw new Error('Transcription request timed out');
+    }
+    console.error("Fetch Error:", error.message);
+    throw error;
+  }
+}
 
 
 
