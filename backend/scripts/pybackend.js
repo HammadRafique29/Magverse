@@ -47,6 +47,24 @@ async function py_refresh_scene(story_scenes, refresh_scene) {
   return responseData.data.scene;
 }
 
+async function py_refresh_imagePrompt(prompt_scene, img_prompt) {
+  const res = await fetch(`${PY_SERVER_URL}/refresh-prompt`, {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt_scene: prompt_scene,
+        img_prompt: img_prompt
+      }),
+  });
+  if (!res.ok) throw new Error(`Server returned error: ${res.status} - ${res.statusText} - ${res.json()['error']}`);
+  const responseData = await res.json();
+  if (responseData.status != "success" ) throw new Error(responseData.error);
+  console.log("API Response:", responseData);
+  return responseData.data.scene;
+}
+
 
 async function py_update_scene(image_prompt, update_scene) {
   const res = await fetch(`${PY_SERVER_URL}/update-scene`, {
@@ -65,7 +83,6 @@ async function py_update_scene(image_prompt, update_scene) {
   console.log("API Response:", responseData);
   return responseData.data.scene;
 }
-
 
 
 // async function pythontranscribeScene(text, speakerAudioFile) {
@@ -131,8 +148,8 @@ async function pythontranscribeScene(text, speakerAudioPath) {
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
-    if (!res.ok) throw new Error(`Server returned error: ${res.status} - ${res.statusText} - ${res.json()['error']}`);
     const responseData = await res.json();
+    if (!res.ok) throw new Error(`Server returned error: ${res.status} - ${res.statusText} - ${responseData['error']}`);
     if (responseData.status !== "success") throw new Error(`Error from API: ${responseData.error}`);
     return responseData.data.audio;
 
@@ -192,4 +209,4 @@ async function py_generate_image(image_prompt, img_width, img_height, regenerate
 }
 
 
-module.exports = { pythontranscribeScene, sendVideoRequest, py_generate_scenes, py_update_scene, py_refresh_scene, py_generate_image };
+module.exports = { pythontranscribeScene, sendVideoRequest, py_generate_scenes, py_update_scene, py_refresh_scene, py_generate_image, py_refresh_imagePrompt };

@@ -43,7 +43,7 @@
 
         import { generate_scenes, refresh_scene, update_scene, get_story } from './scripts/scenes.js';
         // import { generate_image, regenerate_image } from './scripts/images.js'
-        import { generateImage, regenerateImage } from './scripts/api.js'
+        import { generateImage, regenerateImage, refreshImagePrompt, updateImagePrompt } from './scripts/api.js'
 
         const redering_image_container = document.getElementById("redering_image_container");
         const hidden_story_id_ = document.getElementById("hidden_story_id_");
@@ -186,8 +186,8 @@
                     enable_page_control_btn();
                 } else {
                     const response = isRefresh
-                    ? await refresh_scene(storyId, sceneId)
-                    : await update_scene(storyId, sceneId, textarea.value);
+                    ? await refreshImagePrompt(storyId, sceneId)
+                    : await updateImagePrompt(storyId, sceneId, textarea.value);
 
                 setTimeout(() => {
                     if (!response) {
@@ -196,7 +196,7 @@
                             if (isRefresh) textarea.value = originalValue;
                         } else {
                             textarea.style.display = "none";
-                            textarea.value = response.scene;
+                            textarea.value = response.imagePrompt;
                             hiddenInput.value = response.imagePrompt;
                         }
                         RegenerateImage? null : hideOverlay(overlay, content);

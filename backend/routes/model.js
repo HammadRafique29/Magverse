@@ -3,7 +3,7 @@ const ollama_model = require('../scripts/ollama_');
 const { generateSpeechWithSpeaker } = require('../scripts/docker_tts');
 const { 
   pythontranscribeScene, sendVideoRequest, py_generate_scenes, 
-  py_refresh_scene, py_update_scene, py_generate_image } = require('../scripts/pybackend');
+  py_refresh_scene, py_update_scene, py_generate_image, py_refresh_imagePrompt } = require('../scripts/pybackend');
 
 
   let stories_database = {  };
@@ -132,7 +132,6 @@ exports.updateScene = async (event, args) => {
 };
 
 
-
 exports.refreshImagePrompt = async (event, args) => {
   const { story_id, scene_id } = args;
   try {
@@ -146,7 +145,7 @@ exports.refreshImagePrompt = async (event, args) => {
       throw new Error(`Scene not found with ID ${scene_id}`);
     }
     const target_scene = scenesArray[index];
-    const refresh_scene_text = await py_refresh_scene(stories_database[story_id].scenes, target_scene);
+    const refresh_scene_text = await py_refresh_imagePrompt(target_scene.scene, target_scene.imagePrompt);
     const updatedScene = parseScenes(refresh_scene_text, target_scene.scene_id)[0];
     stories_database[story_id].scenes[index] = updatedScene;
     return updatedScene;
@@ -157,7 +156,7 @@ exports.refreshImagePrompt = async (event, args) => {
 };
 
 exports.updateImagePrompt = async (event, args) => {
-  const { story_id, scene_id, new_scene } = args;
+  const { story_id, scene_id, new_prompt } = args;
   try {
     if (!stories_database[story_id]) {
         console.log("Story not found");
@@ -169,8 +168,7 @@ exports.updateImagePrompt = async (event, args) => {
         throw new Error(`Scene not found with ID ${scene_id}`);
     }
     const target_scene = scenesArray[index];
-    const refresh_scene_text = await py_update_scene(target_scene.imagePrompt, new_scene);
-    const updatedScene = parseScenes(refresh_scene_text, target_scene.scene_id)[0];
+    const updatedScene = parseScenes(`${target_scene.scene}(${target_scene.imagePrompt})`, target_scene.scene_id)[0];
     stories_database[story_id].scenes[index] = updatedScene;
     return updatedScene;
     
@@ -182,7 +180,7 @@ exports.updateImagePrompt = async (event, args) => {
 
 
 exports.transcribeScene = async (event, args) => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     setTimeout(async () => {
       try {
         const { story_id, scene_id, speaker_path } = args;
@@ -205,8 +203,10 @@ exports.transcribeScene = async (event, args) => {
           throw new Error("Error generating speech");
         }
         resolve(result);
+        
       } catch (error) {
-        throw error
+        console.log("Second here is here..")
+        reject(error);
       }
     }, 10);
   });
@@ -214,7 +214,7 @@ exports.transcribeScene = async (event, args) => {
 
 
 exports.generateImage = async (event, args) => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     setTimeout(async () => {
 
       try {
@@ -232,7 +232,7 @@ exports.generateImage = async (event, args) => {
         const image_path = await py_generate_image(target_scene.imagePrompt, width, height, false)
         resolve(image_path);
       } catch (error) {
-        throw error;
+        reject(error);
       }
     }, 1000);
   });
@@ -240,30 +240,36 @@ exports.generateImage = async (event, args) => {
 
 
 exports.regenerateImage = async (event, args) => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     setTimeout(async () => {
-      const { story_id, scene_id, width, height } = args;
+      try {
+        const { story_id, scene_id, width, height } = args;
 
-      if (!stories_database[story_id]) {
-        console.log("Story not found");
-        resolve(null);
-        return;
+        if (!stories_database[story_id]) {
+          console.log("Story not found");
+          resolve(null);
+          return;
+        }
+        const scenesArray = stories_database[story_id].scenes;
+        const index = scenesArray.findIndex(scene => scene.scene_id == scene_id);
+        if (index === -1) {
+          throw new Error(`Scene not found with ID ${scene_id}`);
+        }
+        const target_scene = scenesArray[index];
+        const image_path = await py_generate_image(target_scene.imagePrompt, width, height, true)
+        resolve(image_path);
+
+      } catch (error) {
+        reject(error);
       }
-      const scenesArray = stories_database[story_id].scenes;
-      const index = scenesArray.findIndex(scene => scene.scene_id == scene_id);
-      if (index === -1) {
-        throw new Error(`Scene not found with ID ${scene_id}`);
-      }
-      const target_scene = scenesArray[index];
-      const image_path = await py_generate_image(target_scene.imagePrompt, width, height, true)
-      resolve(image_path);
+      
     }, 1000);
   });
 };
 
 
 exports.generateVideo = async (event, args) => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     setTimeout(async () => {
       try {
         const { story_id, rendered_images, transcribed_audios, video_resolution } = args;
@@ -277,8 +283,9 @@ exports.generateVideo = async (event, args) => {
           video_res: video_resolution.split("x"),
         });
         resolve(res);
+        
       } catch (error) {
-        throw error;
+        reject(error);
       }
     }, 2000);
   });

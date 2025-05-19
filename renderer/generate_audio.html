@@ -84,8 +84,8 @@
 
     <script type="module">
         import { generate_scenes, refresh_scene, update_scene, get_story } from './scripts/scenes.js';
-        // import { transcribe_scene } from './scripts/audio.js';
-        import { transcribeScene } from './scripts/api.js';
+        import { transcribe_scene } from './scripts/audio.js';
+        // import { transcribeScene } from './scripts/api.js';
 
         const audio_input = document.getElementById("speaker_file_picker");
         const upload_popup = document.getElementById("upload_audio");
@@ -132,19 +132,25 @@
         }
 
         async function open_upload_popup() {
-            if (is_speaker_selected && !is_audios_genereted) {
-                disable_page_control_btn()
-                await transcribe_audios();
+            try {
+                if (is_speaker_selected && !is_audios_genereted) {
+                    disable_page_control_btn()
+                    await transcribe_audios();
+                    enable_page_control_btn()
+                    next_page_btn.innerText = "Generate Image";
+                    is_audios_genereted = true;
+                    porgressMessage.innerText = "Audios Generated for scenes. Click 'Generate Image' to generate Images";
+                } else if (is_speaker_selected && is_audios_genereted) await go_next();
+                else {
+                    porgressMessage.innerText = "Please Select the Speaker Voice First..."
+                    upload_popup.style.display = "block";
+                    document.querySelector('.content').classList.add('blurred');
+                }
+            } catch (error) {
+                alert("Failed in Generating Audios! Please Try Again & Verify Server is Running....");
                 enable_page_control_btn()
-                next_page_btn.innerText = "Generate Image";
-                is_audios_genereted = true;
-                porgressMessage.innerText = "Audios Generated for scenes. Click 'Generate Image' to generate Images";
-            } else if (is_speaker_selected && is_audios_genereted) await go_next();
-            else {
-                porgressMessage.innerText = "Please Select the Speaker Voice First..."
-                upload_popup.style.display = "block";
-                document.querySelector('.content').classList.add('blurred');
             }
+            
         }
 
         function close_upload_popup() {
@@ -201,12 +207,16 @@
                     const { scene_id: sceneId, scene: sceneText, imagePrompt } = scene;
                     
                     try {
-                        const audio_file_path = await transcribeScene(story_data.story_id, sceneId, filePath);
+                        const audio_file_path = await transcribe_scene(story_data.story_id, sceneId, filePath);
+                        console.log("Here is our response: ", audio_file_path);
                         generated_audios_path.push(audio_file_path)
                         updateProgress(((index + 1) / story_data.draft_story.scenes.length) * 100, `Transcribing Scene ${index + 1}`);
                     } catch (error) {
+                        console.log("Error here: ", error);
                         updateProgress(0, `Error transcribing scene ${index + 1}: ${error.message}`);
                         enable_page_control_btn();
+                        throw error;
+                        break;
                     }
                 }
             }
