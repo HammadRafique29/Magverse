@@ -120,6 +120,7 @@
   /* AI Generated Scenes */
   #AI_generated_scenes {
     width: 90%;
+    min-height: 40%;
     max-height: 70%;
     display: flex;
     justify-content: center;

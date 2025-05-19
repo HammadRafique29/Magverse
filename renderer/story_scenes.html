@@ -20,7 +20,13 @@
             <p>We're Generating Some Scenes For You</p>
         </div>
 
-        <div id="AI_generated_scenes"></div>
+        <div id="AI_generated_scenes">
+            <div id="fetching_request_loader" style="width: 90%;height:40%; display:flex;justify-content: center;align-items: center;flex-direction: column;row-gap: 20px;">
+                <span id="custom_loader_" class="custom-loader"></span>
+                <img id="custom_loader_error_icon" src="../assets/img/server.png" alt="Animated GIF" style="width:10vw;height:10vw;">
+                <span id="custom_loader_error_message" style="color: red;font-size: 1vw;"></span>
+            </div>
+        </div>
         <input type="text" name="hidden_" id="hidden_story_id_" style="display: none;">
             
         <div class="page_controls_container" style="position: absolute;bottom: 10px;">
@@ -40,6 +46,9 @@
         window.addEventListener('DOMContentLoaded', async () => {
             const ai_generated_scenes = document.getElementById("AI_generated_scenes");
             const hidden_story_id_ = document.getElementById("hidden_story_id_");
+            const custom_loader_ = document.getElementById("custom_loader_");
+            const custom_loader_error = document.getElementById("custom_loader_error_message");
+            const custom_loader_error_icon = document.getElementById("custom_loader_error_icon");
             const loader2 = document.getElementById("loading_animation_2");
             const generateText = document.getElementById("generate_text");
             const next_page_btn = document.getElementById("next_");
@@ -167,7 +176,10 @@
                     }, 1500 + Math.random() * 1000);
                 } catch (err) {
                     console.error(err);
+                    enable_page_control_btn();
                     hideOverlay(overlay, content);
+                    alert("Failed to perform action...");
+                    throw error;
                 }
             }
 
@@ -206,13 +218,30 @@
             const story_data = JSON.parse(localStorage.getItem('story_data'));
             const draft_story = JSON.parse(localStorage.getItem('story_data'));
             console.log(draft_story);
-            test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generateScenes(story_data.prompt, story_data.video_dur);
+
+            try {
+                custom_loader_.style.display = "flex"
+                test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generateScenes(story_data.prompt, story_data.video_dur); 
+                
+            } catch (error) {
+                custom_loader_error.style.display = "block";
+                custom_loader_error_icon.style.display = "flex";
+                custom_loader_error.innerText = error;
+                alert("Failed to generate scenes...");
+                throw error;
+
+            } finally {
+                custom_loader_.style.display = "None";
+                enable_page_control_btn();
+            }
+            
             totalScenesFound = test_scenes.scenes.length;
             
             if (story_data) {
                 // test_scenes.scenes.forEach((scene, index) => renderSceneCard(scene, index, test_scenes.story_id, draft_story && draft_story.draft_story ? true : false, true));
                 for (let index = 0; index < test_scenes.scenes.length; index++) {
-                    renderSceneCard(test_scenes['scenes'][index], index, test_scenes.story_id, draft_story && draft_story.draft_story ? true : false, true)
+                    renderSceneCard(test_scenes['scenes'][index], index, test_scenes.story_id, draft_story && draft_story.draft_story ? true : false, true);
+
                 }
                 ai_generated_scenes.addEventListener('click', async (event) => {
                     const target = event.target.closest('button');
