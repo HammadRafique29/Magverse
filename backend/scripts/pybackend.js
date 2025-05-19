@@ -8,9 +8,10 @@ const image = 'ghcr.io/coqui-ai/tts';
 const outputAudio = path.resolve(__dirname, 'output.wav');
 const default_container_name = "ai-video-generator-tts";
 
+const PY_SERVER_URL = "http://192.168.8.100:8098"
 
 async function py_generate_scenes(story_idea, duration) {
-  const res = await fetch("http://localhost:8098/generate-scenes", {
+  const res = await fetch(`${PY_SERVER_URL}/generate-scenes`, {
       method: "POST",
       headers: {
           "Content-Type": "application/json",
@@ -29,7 +30,7 @@ async function py_generate_scenes(story_idea, duration) {
 
 
 async function py_refresh_scene(story_scenes, refresh_scene) {
-  const res = await fetch("http://localhost:8098/refresh-scene", {
+  const res = await fetch(`${PY_SERVER_URL}/refresh-scene`, {
       method: "POST",
       headers: {
           "Content-Type": "application/json",
@@ -48,7 +49,7 @@ async function py_refresh_scene(story_scenes, refresh_scene) {
 
 
 async function py_update_scene(image_prompt, update_scene) {
-  const res = await fetch("http://localhost:8098/update-scene", {
+  const res = await fetch(`${PY_SERVER_URL}/update-scene`, {
       method: "POST",
       headers: {
           "Content-Type": "application/json",
@@ -77,7 +78,7 @@ async function pythontranscribeScene(text, speakerAudioFile) {
     formData.append("text", text);
     formData.append("speaker", speakerAudioFile);
 
-    const res = await fetch("http://localhost:8098/transcribe-text", {
+    const res = await fetch(`${PY_SERVER_URL}/transcribe-text`, {
       method: "POST",
       body: formData,
       signal: controller.signal,
@@ -118,7 +119,7 @@ async function pythontranscribeScene(text, speakerAudioFile) {
 //   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
 //   try {
-//     const res = await fetch("http://localhost:8098/transcribe-text", {
+//     const res = await fetch(`${PY_SERVER_URL}/transcribe-text`, {
 //       method: "POST",
 //       headers: {
 //         "Content-Type": "application/json",
@@ -149,7 +150,7 @@ async function pythontranscribeScene(text, speakerAudioFile) {
 
 
 async function sendVideoRequest(content) {
-    const res = await fetch("http://localhost:8098/generate-video", {
+    const res = await fetch(`${PY_SERVER_URL}/generate-video`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -171,7 +172,7 @@ async function sendVideoRequest(content) {
 
 
 async function py_generate_image(image_prompt, img_width, img_height, regenerate=false) {
-  const res = await fetch("http://localhost:8098/generate-image", {
+  const res = await fetch(`${PY_SERVER_URL}/generate-image`, {
       method: "POST",
       headers: {
           "Content-Type": "application/json",
