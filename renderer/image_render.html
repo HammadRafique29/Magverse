@@ -339,13 +339,6 @@
                 });
             }
             
-            const rendered_images = [
-                "/home/magician/Documents/story_teller/cache/63e2c110-65c2-4c65-9500-d45e2f4ad304.png",
-                "/home/magician/Documents/story_teller/cache/4bae6c1d-51ae-4f12-964c-fe0a5bd39262.png",
-                "/home/magician/Documents/story_teller/cache/5448ca18-1b89-47f5-9bba-ca72e684947d.png",
-                "/home/magician/Documents/story_teller/cache/a80af567-de51-458c-ba94-d39f28d75c74.png"
-            ]
-            
             document.getElementById('next_').addEventListener('click', async () => {
                 
                 const updated_story_data = await getStory(hidden_story_id_.value);
@@ -356,7 +349,7 @@
                         story_id: hidden_story_id_.value,
                         draft_story: updated_story_data,
                         // audios_list: story_data.audios_list,
-                        // render_images: rendered_images // rendered_images_list,
+                        // render_images: rendered_images_list,
                     }));
                 window.location.href = 'generate_video.html';
             });
