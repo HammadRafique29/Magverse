@@ -239,10 +239,8 @@
             totalScenesFound = test_scenes.scenes.length;
             
             if (story_data) {
-                // test_scenes.scenes.forEach((scene, index) => renderSceneCard(scene, index, test_scenes.story_id, draft_story && draft_story.draft_story ? true : false, true));
                 for (let index = 0; index < test_scenes.scenes.length; index++) {
                     renderSceneCard(test_scenes['scenes'][index], index, test_scenes.story_id, draft_story && draft_story.draft_story ? true : false, true);
-
                 }
                 ai_generated_scenes.addEventListener('click', async (event) => {
                     const target = event.target.closest('button');
