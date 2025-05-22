@@ -44,6 +44,18 @@
                         <option value="720x1280">720x1280</option>
                     </select>
                 </div>
+                <div class="select_input_" id="Video_Category_" style="width: 10vw;max-width: 150px">
+                    <select id="Video_Category_input_select" style="width: 100%;">
+                        <option value="" selected>Category</option>
+                        <option value="Scary Tales">Scary Tales</option>
+                        <option value="Fantasy & Mythology">Fantasy & Mythology</option>
+                        <option value="Historical Narratives">Historical Narratives</option>
+                        <option value="Mystery & Suspense">Mystery & Suspense</option>
+                        <option value="Adventure & Exploration">Adventure & Exploration</option>
+                        <option value="Emotional & Heartwarming">Emotional & Heartwarming</option>
+                        <option value="True Stories & Documentaries">True Stories & Documentaries</option>
+                    </select>
+                </div>
             </div>
             
         </div>
@@ -58,21 +70,26 @@
         const durtion = document.getElementById("video_length_input_select")
         const story_input = document.getElementById("story_input");
         const video_resolution = document.getElementById("Video_Resolution_input_select")
+        const Video_Category = document.getElementById("Video_Category_input_select")
         
         function verify_inputs() {
+
             let durationValue = durtion.value;
             let story_prompt = story_input.value;
-            let video_res = video_resolution.value
-            if (durationValue && story_prompt && video_res) {
+            let video_res = video_resolution.value;
+            let video_cate = Video_Category.value;
+
+            if (durationValue && story_prompt && video_res && video_cate) {
                 console.log(`Prompt: ${story_prompt}  Duration: ${durationValue}`)
                 return {
                     prompt: story_prompt,
                     duration: durationValue,
-                    resolution: video_res
+                    resolution: video_res,
+                    category: video_cate
                 };
             }
             else {
-                alert(!story_prompt? "Please share your story idea..." : !durationValue? "Please select the duration of video" : !video_res? "Please select the video resolution": "" );
+                alert(!story_prompt? "Please share your story idea..." : !durationValue? "Please select the duration of video" : !video_res? "Please select the video resolution": !video_cate? "Please Select All Fields To Go Furthur": "" );
                 return false;
             }
         }

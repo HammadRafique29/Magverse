@@ -221,7 +221,7 @@
 
             try {
                 custom_loader_.style.display = "flex"
-                test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generateScenes(story_data.prompt, story_data.video_dur); 
+                test_scenes = (draft_story && draft_story.draft_story) ? draft_story.draft_story : await generateScenes(story_data.prompt, story_data.video_dur, story_data.video_cate); 
                 document.getElementById("fetching_request_loader").style.display = "none";
                 
             } catch (error) {
