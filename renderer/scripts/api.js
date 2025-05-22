@@ -1,7 +1,7 @@
 
-export async function generateScenes(prompt, duration) {
+export async function generateScenes(prompt, duration, category) {
   console.log(`Here ${prompt} ${duration}` )
-  return await window.api.call('model:generateScenes', { prompt, duration });
+  return await window.api.call('model:generateScenes', { prompt, duration, category });
 }
 
 export async function refreshScene(story_id, scene_id) {
