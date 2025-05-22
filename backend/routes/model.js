@@ -68,11 +68,11 @@ exports.getStory = async (event, args) => {
 };
 
 exports.generateScenes = async (event, args) => {
-  const { prompt, duration } = args;
+  const { prompt, duration, category } = args;
   try {
     // const scenes = await ollama_model.generate_scenes();
     console.log(prompt, duration);
-    const scenes = await py_generate_scenes(prompt, duration);
+    const scenes = await py_generate_scenes(prompt, duration, category);
     const result = parseScenes(scenes, () => Math.floor(Math.random() * 99999));
     // const result = test_results
     console.log(result)
