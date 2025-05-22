@@ -10,7 +10,7 @@ const default_container_name = "ai-video-generator-tts";
 
 const PY_SERVER_URL = "http://localhost:8098"
 
-async function py_generate_scenes(story_idea, duration) {
+async function py_generate_scenes(story_idea, duration, category) {
   const res = await fetch(`${PY_SERVER_URL}/generate-scenes`, {
       method: "POST",
       headers: {
@@ -18,7 +18,8 @@ async function py_generate_scenes(story_idea, duration) {
       },
       body: JSON.stringify({
         story_idea: story_idea,
-        duration: duration
+        duration: duration,
+        category: category
       }),
   });
   const responseData = await res.json();
