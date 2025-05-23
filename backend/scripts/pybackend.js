@@ -168,24 +168,28 @@ async function pythontranscribeScene(text, speakerAudioPath) {
 
 
 async function sendVideoRequest(content) {
+  try {
     const res = await fetch(`${PY_SERVER_URL}/generate-video`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            story_data: content["draft_story"],
-            rendered_images: content["render_images"],
-            transcribed_audios: content["transcribed_audios"],
-            video_resolution: content["video_res"],
-            video_fps: 30
-        }),
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+          story_data: content["draft_story"],
+          rendered_images: content["render_images"],
+          transcribed_audios: content["transcribed_audios"],
+          video_resolution: content["video_res"],
+          video_fps: 30
+      }),
     });
-    if (!res.ok) throw new Error(`Server returned error: ${res.status} - ${res.statusText} - ${res.json()['error']}`);
     const responseData = await res.json();
+    if (!res.ok) throw new Error(`Server returned error: ${res.status} - ${res.statusText} - ${responseData['error']}`);
     if (responseData.status != "success" ) throw new Error(responseData.error);
-    console.log("API Response:", responseData);
     return responseData;
+
+  } catch (error) {
+    throw error;
+  }
 }
 
 
@@ -202,8 +206,8 @@ async function py_generate_image(image_prompt, img_width, img_height, regenerate
         regenerate: regenerate
       }),
   });
-  if (!res.ok) throw new Error(`Server returned error: ${res.status} - ${res.statusText} - ${res.json()['error']}`);
   const responseData = await res.json();
+  if (!res.ok) throw new Error(`Server returned error: ${res.status} - ${res.statusText} - ${responseData['error']}`);
   if (responseData.status != "success" ) throw new Error(responseData.error);
   console.log("API Response:", responseData.data.img);
   return responseData.data.img;
