@@ -1,5 +1,5 @@
 const modelRoute = require('./model');
-const { ipcMain, dialog } = require('electron');
+const { ipcMain } = require('electron');
 
 module.exports = function setupRoutes(ipcMain) {
   ipcMain.handle('model:generateScenes', modelRoute.generateScenes);
@@ -12,10 +12,5 @@ module.exports = function setupRoutes(ipcMain) {
   ipcMain.handle('model:generateImage', modelRoute.generateImage);
   ipcMain.handle('model:regenerateImage', modelRoute.regenerateImage);
   ipcMain.handle('model:generateVideo', modelRoute.generateVideo);
-  ipcMain.handle('dialog:pickFile', async () => {
-    return await dialog.showOpenDialog({
-      properties: ['openFile'],
-      filters: [{ name: 'WAV Files', extensions: ['wav', 'mp3'] }]
-    });
-  });
+  ipcMain.handle('dialog:pickFile',  modelRoute.filePicker);
 };

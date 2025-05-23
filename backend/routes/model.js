@@ -1,47 +1,50 @@
 
 const ollama_model = require('../scripts/ollama_');
+const { dialog }  = require('electron');
 const { generateSpeechWithSpeaker } = require('../scripts/docker_tts');
 const { 
   pythontranscribeScene, sendVideoRequest, py_generate_scenes, 
   py_refresh_scene, py_update_scene, py_generate_image, py_refresh_imagePrompt } = require('../scripts/pybackend');
 
 
-  let stories_database = {  };
-
-
-
-const test_results = [
-  {
-      "scene": "Morning mist curled around the roots of ancient trees as a young girl named Elara wandered deeper into the heart of the forest, drawn by a melody only she could hear.",
-      "imagePrompt": "a young girl walking through a misty magical forest with ancient trees and soft morning light",
-      "scene_id": 5469
-  },
-  {
-      "scene": "A fox with silver fur and wise eyes appeared before her, motioning with its head as if to say, “Follow me.”",
-      "imagePrompt": "a silver-furred fox with glowing eyes standing on a forest path, early sunlight streaming through the trees",
-      "scene_id": 66333
-  },
-  {
-      "scene": "They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air.",
-      "imagePrompt": "a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky",
-      "scene_id": 40604
-  },
-  {
-      "scene": "At the center stood a hollow tree with a spiral staircase leading deep underground, its bark carved with glowing runes.",
-      "imagePrompt": "an ancient hollow tree with glowing runes and a spiral staircase descending inside",
-      "scene_id": 5356
-  },
-  {
-      "scene": "Elara hesitated, then stepped into the tree, her heart pounding as the air shimmered around her.",
-      "imagePrompt": "a girl entering a glowing tree with a magical aura, the inside illuminated by mysterious light",
-      "scene_id": 60029
-  },
-  {
-      "scene": "They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air.",
-      "imagePrompt": "a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky",
-      "scene_id": 66744
+  let stories_database = { 
+    "50800" : {
+    "scenes": [
+      {
+          "scene": "Morning mist curled around the roots of ancient trees as a young girl named Elara wandered deeper into the heart of the forest, drawn by a melody only she could hear.",
+          "imagePrompt": "a young girl walking through a misty magical forest with ancient trees and soft morning light",
+          "scene_id": 5469
+      },
+      {
+          "scene": "A fox with silver fur and wise eyes appeared before her, motioning with its head as if to say, “Follow me.”",
+          "imagePrompt": "a silver-furred fox with glowing eyes standing on a forest path, early sunlight streaming through the trees",
+          "scene_id": 66333
+      },
+      {
+          "scene": "They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air.",
+          "imagePrompt": "a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky",
+          "scene_id": 40604
+      },
+      {
+          "scene": "At the center stood a hollow tree with a spiral staircase leading deep underground, its bark carved with glowing runes.",
+          "imagePrompt": "an ancient hollow tree with glowing runes and a spiral staircase descending inside",
+          "scene_id": 5356
+      },
+      {
+          "scene": "Elara hesitated, then stepped into the tree, her heart pounding as the air shimmered around her.",
+          "imagePrompt": "a girl entering a glowing tree with a magical aura, the inside illuminated by mysterious light",
+          "scene_id": 60029
+      },
+      {
+          "scene": "They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air.",
+          "imagePrompt": "a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky",
+          "scene_id": 66744
+      }
+    ],
+    "story_id": 50800
   }
-]
+   };
+
 
 function parseScenes(text, scene_id) {
   return text
@@ -202,6 +205,7 @@ exports.transcribeScene = async (event, args) => {
           console.log("Error generating speech");
           throw new Error("Error generating speech");
         }
+        stories_database[story_id]['scenes'][index]['audio'] = result;
         resolve(result);
         
       } catch (error) {
@@ -229,7 +233,8 @@ exports.generateImage = async (event, args) => {
           throw new Error(`Scene not found with ID ${scene_id}`);
         }
         const target_scene = scenesArray[index];
-        const image_path = await py_generate_image(target_scene.imagePrompt, width, height, false)
+        const image_path = await py_generate_image(target_scene.imagePrompt, width, height, false);
+        stories_database[story_id]['scenes'][index]['img'] = image_path;
         resolve(image_path);
       } catch (error) {
         reject(error);
@@ -257,6 +262,7 @@ exports.regenerateImage = async (event, args) => {
         }
         const target_scene = scenesArray[index];
         const image_path = await py_generate_image(target_scene.imagePrompt, width, height, true)
+        stories_database[story_id]['scenes'][index]['img'] = image_path;
         resolve(image_path);
 
       } catch (error) {
@@ -272,21 +278,44 @@ exports.generateVideo = async (event, args) => {
   return new Promise((resolve, reject) => {
     setTimeout(async () => {
       try {
-        const { story_id, rendered_images, transcribed_audios, video_resolution } = args;
+        const { story_id, video_resolution } = args;
         if (!stories_database[story_id]) {
           throw new Error(`Story not found with ID ${story_id}`);
         }
         const res = await sendVideoRequest({
           draft_story: stories_database[story_id],
-          render_images: rendered_images,
-          transcribed_audios: transcribed_audios,
-          video_res: video_resolution.split("x"),
+          video_res: video_resolution
         });
         resolve(res);
-        
       } catch (error) {
         reject(error);
       }
     }, 2000);
   });
+};
+
+
+
+exports.filePicker = async (event, args) => {
+  const fileType = args?.file_type || ['mp3', 'wav'];
+  const scene_id = args?.scene_id || null;
+  const story_id = args?.story_id || null;
+  const image_path = await dialog.showOpenDialog({
+    properties: ['openFile'],
+    filters: [{ name: 'Files', extensions: fileType }]
+  });
+  if (scene_id) {
+    if (!stories_database[story_id]) {
+      console.log("Story not found");
+      resolve(null);
+      return;
+    }
+    const scenesArray = stories_database[story_id].scenes;
+    const index = scenesArray.findIndex(scene => scene.scene_id == scene_id);
+    if (index === -1) {
+      throw new Error(`Scene not found with ID ${scene_id}`);
+    }
+    stories_database[story_id]['scenes'][index]['img'] = image_path.filePaths[0];
+  }
+  return image_path;
 };
