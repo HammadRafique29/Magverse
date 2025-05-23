@@ -220,8 +220,20 @@
                     }
                 }
             }
-            
         }
+
+        const audios_list = [
+            "/home/magician/Documents/story_teller/output_audio_11987.wav",
+            "/home/magician/Documents/story_teller/output_audio_98951.wav",
+            "/home/magician/Documents/story_teller/output_audio_74081.wav",
+            "/home/magician/Documents/story_teller/output_audio_39025.wav"
+        ],
+        render_images = [
+            "/home/magician/Desktop/story_tellor_backend/temp/1.png",
+            "/home/magician/Desktop/story_tellor_backend/temp/2.png",
+            "/home/magician/Desktop/story_tellor_backend/temp/3.png",
+            "/home/magician/Desktop/story_tellor_backend/temp/4.png"
+        ]
         async function go_next() {
             const updated_story_data = await get_story(story_data.story_id);
             localStorage.setItem('story_data', JSON.stringify({
@@ -230,7 +242,7 @@
                     video_res: story_data.video_res,
                     story_id: story_data.story_id,
                     draft_story: updated_story_data,
-                    audios_list: generated_audios_path,
+                    // audios_list: audios_list //generated_audios_path,
                 }));
             window.location.href = 'image_render.html';
         }

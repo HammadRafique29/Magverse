@@ -40,299 +40,295 @@
     </div>
     <script type="module" src="scripts/index.js"></script>
     <script type="module">
-
-        import { generate_scenes, refresh_scene, update_scene, get_story } from './scripts/scenes.js';
-        // import { generate_image, regenerate_image } from './scripts/images.js'
-        import { generateImage, regenerateImage, refreshImagePrompt, updateImagePrompt } from './scripts/api.js'
-
-        const redering_image_container = document.getElementById("redering_image_container");
-        const hidden_story_id_ = document.getElementById("hidden_story_id_");
-        const loader2 = document.getElementById("loading_animation");
-        const generateText = document.getElementById("generate_text");
-        const next_page_btn = document.getElementById("next_");
-        const back_page_btn = document.getElementById("back_");
-
-        const rendered_images_list = [];
-        let video_resolution = [];
-        let story_data = null;
-
-        story_data = {
-            "prompt": "aksjdasd",
-            "video_dur": "5",
-            "video_res": "1280x720",
-            "story_id": "50800",
-            "draft_story": {
-                "scenes": [
-                    {
-                        "scene": "Morning mist curled around the roots of ancient trees as a young girl named Elara wandered deeper into the heart of the forest, drawn by a melody only she could hear.",
-                        "imagePrompt": "a young girl walking through a misty magical forest with ancient trees and soft morning light",
-                        "scene_id": 5469
-                    },
-                    {
-                        "scene": "A fox with silver fur and wise eyes appeared before her, motioning with its head as if to say, “Follow me.”",
-                        "imagePrompt": "a silver-furred fox with glowing eyes standing on a forest path, early sunlight streaming through the trees",
-                        "scene_id": 66333
-                    },
-                    {
-                        "scene": "They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air.",
-                        "imagePrompt": "a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky",
-                        "scene_id": 40604
-                    },
-                    {
-                        "scene": "At the center stood a hollow tree with a spiral staircase leading deep underground, its bark carved with glowing runes.",
-                        "imagePrompt": "an ancient hollow tree with glowing runes and a spiral staircase descending inside",
-                        "scene_id": 5356
-                    },
-                    {
-                        "scene": "Elara hesitated, then stepped into the tree, her heart pounding as the air shimmered around her.",
-                        "imagePrompt": "a girl entering a glowing tree with a magical aura, the inside illuminated by mysterious light",
-                        "scene_id": 60029
-                    },
-                    {
-                        "scene": "They reached a clearing where flowers glowed in soft blues and purples, swaying gently despite the still air.",
-                        "imagePrompt": "a mystical forest clearing filled with glowing blue and purple flowers under a soft twilight sky",
-                        "scene_id": 66744
-                    }
-                ],
-                "story_id": 50800
-            },
-            "audios_list": [
-                "/home/magician/Documents/story_teller/output_audio_24901.wav",
-                "/home/magician/Documents/story_teller/output_audio_52727.wav",
-                "/home/magician/Documents/story_teller/output_audio_65457.wav",
-                "/home/magician/Documents/story_teller/output_audio_52212.wav",
-                "/home/magician/Documents/story_teller/output_audio_15624.wav",
-                "/home/magician/Documents/story_teller/output_audio_25693.wav"
-            ],
-            "render_images": [
-                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
-                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
-                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
-                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
-                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
-                "/home/magician/Desktop/story_teller/assets/img/renderd_img.png"
-            ]
-        }
-
-        function enable_page_control_btn() {
-            loader2.style.display = "none";
-            generateText.style.display = "flex";
-            next_page_btn.disabled = false;
-            next_page_btn.style.cursor = "pointer";
-            back_page_btn.disabled = false;
-            back_page_btn.style.cursor = "pointer";
-        }
-        function disable_page_control_btn() {
-            loader2.style.display = "block";
-            generateText.style.display = "none";
-            next_page_btn.disabled = true;
-            next_page_btn.style.cursor = "not-allowed";
-            back_page_btn.disabled = true;
-            back_page_btn.style.cursor = "not-allowed";
-        }
-
-        // Show Skeleton Progress Animation
-        function showOverlay(overlay, content) {
-            overlay.style.opacity = 1;
-            overlay.style.pointerEvents = 'all';
-            content.classList.remove('fade_in_show_');
-        }
-
-        // Hide or Remove Skeleton Progress Animation
-        function hideOverlay(overlay, content) {
-            overlay.style.opacity = 0;
-            overlay.style.pointerEvents = 'none';
-            content.style.display = "block";
-            setTimeout(() => {
-                content.classList.add('fade_in_show_');
-                enable_page_control_btn();
-            }, 50);
-        }
-        
-        // Handle Scenes Interaction: Update, Refresh
-        async function handleSceneInteraction(button, isRefresh, RegenerateImage) {
-            const sceneId = button.getAttribute('data-scene-id');
-            const storyId = button.getAttribute('data-story-id');
-            const container = document.getElementById(`scene_${sceneId}`);
-            const overlay = container.querySelector('.loading_overlay_full_');
-            const content = container.querySelector('.scene_content_');
-            const textarea = container.querySelector(`#scene_output_${sceneId}`);
-            const hiddenInput = container.querySelector(`#hidden_image_prompt_${sceneId}`);
-            const error_message = document.getElementById(`error_scene_prompt_${sceneId}`);
-
-            const originalValue = textarea.value;
-            if (isRefresh) textarea.value = "";
-            disable_page_control_btn();
-            RegenerateImage? null : showOverlay(overlay, content);
-            try {
-                if (RegenerateImage) {
-                    const image_render_src = document.getElementById(`render_image_src_${sceneId}`);
-                    const scene_loader = document.getElementById(`custom_loader_${sceneId}`);
-
-                    image_render_src.style.display = "none";
-                    scene_loader.style.display = "flex";
-
-                    disable_page_control_btn();
-                    error_message.style.display = "none";
-                    
-
-                    let res_img_path = await regenerateImage(storyId, sceneId, video_resolution[0], video_resolution[1]);
-
-                    console.log(`Regenerate Response ${sceneId}: `, res_img_path)
-                    scene_loader.style.display = "none";
-                    image_render_src.src = res_img_path;
-                    image_render_src.style.display = "flex";
-                    rendered_images_list.push(res_img_path);
-                    enable_page_control_btn();
-                } else {
-                    const response = isRefresh
-                    ? await refreshImagePrompt(storyId, sceneId)
-                    : await updateImagePrompt(storyId, sceneId, textarea.value);
-
-                setTimeout(() => {
-                    if (!response) {
-                            alert(`Failed to ${RegenerateImage? "Re-generate" : isRefresh ? "refresh" : "update"} scene. Please try again.`);
-                            console.error(`Failed to ${RegenerateImage? "Re-generate" : isRefresh ? "refresh" : "update"} scene`);
-                            if (isRefresh) textarea.value = originalValue;
-                        } else {
-                            textarea.style.display = "none";
-                            textarea.value = response.imagePrompt;
-                            hiddenInput.value = response.imagePrompt;
-                        }
-                        RegenerateImage? null : hideOverlay(overlay, content);
-                        
-                    }, 1500 + Math.random() * 1000);
-                } 
-            } catch (err) {
-                console.error(err);
-                textarea.style.display = "none";
-                error_message.style.display = "flex";
-                error_message.innerText = `Failed to generte content. Try Again\n${err}`
-                RegenerateImage? null : hideOverlay(overlay, content);
-            }
-        }
-
-
-        function play_transcribed_audio(button) {
-            const sceneId = button.getAttribute('data-scene-id');
-            const storyId = button.getAttribute('data-story-id');
-            var audio = document.getElementById(`transcribed_audio_${sceneId}`);
-            var play_ico = document.getElementById(`play_audio_img_${sceneId}`);
-            var pause_ico = document.getElementById(`pause_audio_img_${sceneId}`);
-            const isPlaying = audio.getAttribute('data-isPlaying');
-
-            if (isPlaying === "true") {
-                audio.pause();
-                audio.currentTime = 0;
-                play_ico.style.display = "block";
-                pause_ico.style.display = "none"
-                // pause_ico.disabled = true;
-                audio.setAttribute("data-isPlaying", "false");
-            } else {
-                audio.play();
-                play_ico.style.display = "none";
-                pause_ico.style.display = "block";
-                audio.setAttribute("data-isPlaying", "true");
-            }
-        }
-
-        function renderScenesDetails(scene, index, storyId) {
-            const { scene_id: sceneId, scene: sceneText, imagePrompt } = scene;
-            disable_page_control_btn();
-
-            const elem_html = `
-            <div class="rendered_image_">
-                <div class="rendered_image_container">
-                    <img src="" id="render_image_src_${sceneId}" alt="" srcset="" style="display: none;">
-                    <span id="custom_loader_${sceneId}" class="custom-loader"></span>
-                </div>
-
-                <div class="rendered_image_details_container">
-                    <div id="scene_${sceneId}" class="generated_scenes_">
-                        <div class="loading_overlay_full_">
-                            <div class="shimmer_"></div>
-                            <div class="spinner_circle"></div>
-                        </div>
-                        <div class="scene_content_" style="display: none;height: clamp(100px, 20vh, 200px);">
-                            <div class="scene_ids_">Scene${index+1}</div>
-                            <div class="scene_prompt_">
-                                <div id="error_scene_prompt_${sceneId}" style="height:90%;width:90%;display:flex;justify-content:center;align-items:center;color:gray;display:none">
-                                    Failed To Generate Content    
-                                </div>
-                                <textarea class="scene_prompt_textarea" name="scene_output_${sceneId}" id="scene_output_${sceneId}" cols="30">${imagePrompt}</textarea>
-                                </textarea>
-                            </div>
-                            <div class="scenes_controls_">
-                                <button type="button" class="refresh_prompt_btn_" data-story-id="${storyId}" data-scene-id="${sceneId}">
-                                    <img src="../assets/img/refresh.png" width="20vw" height="20vw"
-                                        style="background-color:transparent;" alt="" srcset="">
-                                </button>
-                                <audio id="transcribed_audio_${sceneId}" src="${story_data.audios_list[index]}" data-isPlaying="false" preload="auto"></audio>
-                                <button type="button" class="play_pause_audio" data-story-id="${storyId}" data-scene-id="${sceneId}" style="background-color: transparent;outline: none;border: none;">
-                                    <img id="play_audio_img_${sceneId}"  src="../assets/img/play.png" width="20vw" height="20vw"
-                                        style="background-color:transparent;" alt="" srcset="">
-                                    <img id="pause_audio_img_${sceneId}" src="../assets/img/pause.png" width="20vw" height="20vw"
-                                        style="background-color:transparent;display:none" alt="" srcset="">
-                                </button>
-                                <button id="update_prompt_${sceneId}"  data-story-id="${storyId}" data-scene-id="${sceneId}" class="update_prompt_btn_">Update</button>
-                                <input type="hidden" id="hidden_image_prompt_${sceneId}" data-story-id="${storyId}" data-scene-id="${sceneId}" value="${imagePrompt}">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="image_generation_settings_">
-                        <button type="button" class="re-generate_image_ render_image_style_" data-story-id="${storyId}" data-scene-id="${sceneId}">
-                            Re-generate Image
-                        </button>
-                        <select class="image_resolution_ render_image_style_" style="display: none;">
-                            <option>720 x 1080</option>
-                            <option>1080 x 1920</option>
-                            <option>1920 x 1080</option>
-                        </select>
-                    </div>
-                </div>
-            </div>`;
-            redering_image_container.insertAdjacentHTML('beforeend', elem_html);
-            hidden_story_id_.value = storyId;
-            const container = document.getElementById(`scene_${sceneId}`);
-            const overlay = container.querySelector('.loading_overlay_full_');
-            const content = container.querySelector('.scene_content_');
-            hideOverlay(overlay, content);
-        }
-
-        async function generate_ai_images(totalScenes, story_id, scene_id, old_render_image) {
-
-            const image_render_src = document.getElementById(`render_image_src_${scene_id}`);
-            const scene_loader = document.getElementById(`custom_loader_${scene_id}`);
-
-            let res_img_path = !old_render_image? await generateImage(story_id, scene_id, video_resolution[0], video_resolution[1]) : old_render_image;
-            console.log(`Response ${scene_id}: `, res_img_path)
-            scene_loader.style.display = "none";
-            image_render_src.src = res_img_path;
-            image_render_src.style.display = "flex";
-            rendered_images_list.push(res_img_path);
-            if (rendered_images_list.length == totalScenes) {
-                enable_page_control_btn();
-            }
-        }
+        import { generateImage, regenerateImage, refreshImagePrompt, updateImagePrompt, getStory } from './scripts/api.js'
 
         window.addEventListener('DOMContentLoaded', async () => {
-            
-            // story_data = JSON.parse(localStorage.getItem('story_data'));
-            let draft_story = story_data.draft_story;
-            let old_render_images = story_data.render_images;
-            video_resolution = story_data.video_res.split("x")
-            console.log('story_data', story_data);
-            disable_page_control_btn()
+            const redering_image_container = document.getElementById("redering_image_container");
+            const hidden_story_id_ = document.getElementById("hidden_story_id_");
+            const loader2 = document.getElementById("loading_animation");
+            const generateText = document.getElementById("generate_text");
+            const next_page_btn = document.getElementById("next_");
+            const back_page_btn = document.getElementById("back_");
 
+            const rendered_images_list = [];
+            let video_resolution = [];
+            let story_data = null;
+
+            story_data = JSON.parse(localStorage.getItem('story_data'));
+            let draft_story = story_data.draft_story;
+            video_resolution = story_data['video_res'].split("x");
+            console.log('story_data', story_data);
+
+            function enable_page_control_btn() {
+                loader2.style.display = "none";
+                generateText.style.display = "flex";
+                next_page_btn.disabled = false;
+                next_page_btn.style.cursor = "pointer";
+                back_page_btn.disabled = false;
+                back_page_btn.style.cursor = "pointer";
+            }
+            function disable_page_control_btn() {
+                loader2.style.display = "block";
+                generateText.style.display = "none";
+                next_page_btn.disabled = true;
+                next_page_btn.style.cursor = "not-allowed";
+                back_page_btn.disabled = true;
+                back_page_btn.style.cursor = "not-allowed";
+            }
+
+            // Show Skeleton Progress Animation
+            function showOverlay(overlay, content) {
+                overlay.style.opacity = 1;
+                overlay.style.pointerEvents = 'all';
+                content.classList.remove('fade_in_show_');
+            }
+
+            // Hide or Remove Skeleton Progress Animation
+            function hideOverlay(overlay, content) {
+                overlay.style.opacity = 0;
+                overlay.style.pointerEvents = 'none';
+                content.style.display = "block";
+                setTimeout(() => {
+                    content.classList.add('fade_in_show_');
+                    enable_page_control_btn();
+                }, 50);
+            }
+            
+            // Handle Scenes Interaction: Update, Refresh
+            async function handleSceneInteraction(button, isRefresh, RegenerateImage) {
+                const sceneId = button.getAttribute('data-scene-id');
+                const storyId = button.getAttribute('data-story-id');
+                const container = document.getElementById(`scene_${sceneId}`);
+                const overlay = container.querySelector('.loading_overlay_full_');
+                const content = container.querySelector('.scene_content_');
+                const textarea = container.querySelector(`#scene_output_${sceneId}`);
+                const hiddenInput = container.querySelector(`#hidden_image_prompt_${sceneId}`);
+                const error_message = document.getElementById(`error_scene_prompt_${sceneId}`);
+
+                const originalValue = textarea.value;
+                if (isRefresh) textarea.value = "";
+                disable_page_control_btn();
+                RegenerateImage? null : showOverlay(overlay, content);
+                try {
+                    if (RegenerateImage) {
+                        const image_render_src = document.getElementById(`render_image_src_${sceneId}`);
+                        const scene_loader = document.getElementById(`custom_loader_${sceneId}`);
+
+                        image_render_src.style.display = "none";
+                        scene_loader.style.display = "flex";
+
+                        disable_page_control_btn();
+                        error_message.style.display = "none";
+                        
+                        console.log("Resolution: ", video_resolution);
+                        let res_img_path = await regenerateImage(storyId, sceneId, video_resolution[0], video_resolution[1]);
+                        
+                        // for (let index = 0; index < draft_story.scenes.length; index++) {
+                        //     if (draft_story['scenes'][index].scene_id == sceneId) {
+                        //         rendered_images_list[index] = res_img_path;
+                        //         // draft_story['scenes'][index]['img'] = res_img_path;
+                        //     }
+                        // }
+                        console.log(`Regenerate Response ${sceneId}: `, res_img_path)
+                        scene_loader.style.display = "none";
+                        image_render_src.src = res_img_path;
+                        image_render_src.style.display = "flex";
+                        enable_page_control_btn();
+                    } else {
+                        const response = isRefresh
+                        ? await refreshImagePrompt(storyId, sceneId)
+                        : await updateImagePrompt(storyId, sceneId, textarea.value);
+
+                    setTimeout(() => {
+                        if (!response) {
+                                alert(`Failed to ${RegenerateImage? "Re-generate" : isRefresh ? "refresh" : "update"} scene. Please try again.`);
+                                console.error(`Failed to ${RegenerateImage? "Re-generate" : isRefresh ? "refresh" : "update"} scene`);
+                                if (isRefresh) textarea.value = originalValue;
+                            } else {
+                                textarea.style.display = "none";
+                                textarea.value = response.imagePrompt;
+                                hiddenInput.value = response.imagePrompt;
+                            }
+                            RegenerateImage? null : hideOverlay(overlay, content);
+                            
+                        }, 1500 + Math.random() * 1000);
+                    } 
+                } catch (err) {
+                    console.error(err);
+                    textarea.style.display = "none";
+                    error_message.style.display = "flex";
+                    error_message.innerText = `Failed to generte content. Try Again\n${err}`
+                    RegenerateImage? null : hideOverlay(overlay, content);
+                }
+            }
+
+            function play_transcribed_audio(button) {
+                const sceneId = button.getAttribute('data-scene-id');
+                const storyId = button.getAttribute('data-story-id');
+                var audio = document.getElementById(`transcribed_audio_${sceneId}`);
+                var play_ico = document.getElementById(`play_audio_img_${sceneId}`);
+                var pause_ico = document.getElementById(`pause_audio_img_${sceneId}`);
+                const isPlaying = audio.getAttribute('data-isPlaying');
+
+                if (isPlaying === "true") {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    play_ico.style.display = "block";
+                    pause_ico.style.display = "none"
+                    // pause_ico.disabled = true;
+                    audio.setAttribute("data-isPlaying", "false");
+                } else {
+                    audio.play();
+                    play_ico.style.display = "none";
+                    pause_ico.style.display = "block";
+                    audio.setAttribute("data-isPlaying", "true");
+                }
+            }
+            
+            function handleImageLoad(img, sceneId) {
+                const blurBg = document.getElementById(`blur_bg_${sceneId}`);
+                const width = img.naturalWidth;
+                const height = img.naturalHeight;
+                // Set image display style
+                if (height > width) {
+                    blurBg.style.backgroundImage = `url('${img.src}')`;
+                    blurBg.style.display = 'block';
+                    img.style.width = 'auto';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'contain';
+                } else {
+                    blurBg.style.display = 'none';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                }
+                img.style.display = 'block';
+                // Add click event for download or new tab
+                img.style.cursor = 'pointer';
+                img.onclick = () => {
+                    const imageUrl = img.src;
+                    if (window?.require) {
+                        const { shell } = window.require('electron');
+                        shell.openExternal(imageUrl);
+                    } else {
+                        const a = document.createElement('a');
+                        a.href = imageUrl;
+                        a.target = '_blank';
+                        a.download = '';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    }
+                };
+            }
+            
+            async function triggerFileInput(sceneId, index) {
+                const result = await window.api.call('dialog:pickFile', { file_type: ['jpg', 'jpeg', 'png'], scene_id: sceneId, story_id: hidden_story_id_.value });
+                if (result.canceled || !result.filePaths.length) return;
+                const filePath = result.filePaths[0];           
+                const img = document.getElementById(`render_image_src_${sceneId}`);
+                img.src = filePath;
+                // draft_story['scenes'][index]['img'] = filePath
+                rendered_images_list[index] = filePath;
+                console.log(rendered_images_list);
+            }
+            
+            function renderScenesDetails(scene, index, storyId) {
+                const { scene_id: sceneId, scene: sceneText, imagePrompt } = scene;
+                disable_page_control_btn();
+                // <div class="rendered_image_container">
+                //         <img src="" id="render_image_src_${sceneId}" alt="" srcset="" style="display: none;">
+                //         <span id="custom_loader_${sceneId}" class="custom-loader"></span>
+                //     </div>
+                const elem_html = `
+                <div class="rendered_image_">
+                    <div class="rendered_image_container" id="container_${sceneId}">
+                        <div class="blur-sides" id="blur_bg_${sceneId}"></div>
+                        <img src="" id="render_image_src_${sceneId}" alt="" onload="handleImageLoad(this, '${sceneId}')" style="display: none;">
+                        <span id="custom_loader_${sceneId}" class="custom-loader"></span>
+                    </div>
+                    <div class="rendered_image_details_container">
+                        <div id="scene_${sceneId}" class="generated_scenes_">
+                            <div class="loading_overlay_full_">
+                                <div class="shimmer_"></div>
+                                <div class="spinner_circle"></div>
+                            </div>
+                            <div class="scene_content_" style="display: none;height: clamp(100px, 20vh, 200px);">
+                                <div class="scene_ids_">Scene${index+1}</div>
+                                <div class="scene_prompt_">
+                                    <div id="error_scene_prompt_${sceneId}" style="height:90%;width:90%;display:flex;justify-content:center;align-items:center;color:gray;display:none">
+                                        Failed To Generate Content    
+                                    </div>
+                                    <textarea class="scene_prompt_textarea" name="scene_output_${sceneId}" id="scene_output_${sceneId}" cols="30">${imagePrompt}</textarea>
+                                    </textarea>
+                                </div>
+                                <div class="scenes_controls_">
+                                    <button type="button" class="refresh_prompt_btn_" data-story-id="${storyId}" data-scene-id="${sceneId}">
+                                        <img src="../assets/img/refresh.png" width="20vw" height="20vw"
+                                            style="background-color:transparent;" alt="" srcset="">
+                                    </button>
+                                    <audio id="transcribed_audio_${sceneId}" src="${draft_story['scenes'][index]['audio']}" data-isPlaying="false" preload="auto"></audio>
+                                    <button type="button" class="play_pause_audio" data-story-id="${storyId}" data-scene-id="${sceneId}" style="background-color: transparent;outline: none;border: none;">
+                                        <img id="play_audio_img_${sceneId}"  src="../assets/img/play.png" width="20vw" height="20vw"
+                                            style="background-color:transparent;" alt="" srcset="">
+                                        <img id="pause_audio_img_${sceneId}" src="../assets/img/pause.png" width="20vw" height="20vw"
+                                            style="background-color:transparent;display:none" alt="" srcset="">
+                                    </button>
+                                    <button id="update_prompt_${sceneId}"  data-story-id="${storyId}" data-scene-id="${sceneId}" class="update_prompt_btn_">Update</button>
+                                    <input type="hidden" id="hidden_image_prompt_${sceneId}" data-story-id="${storyId}" data-scene-id="${sceneId}" value="${imagePrompt}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="image_generation_settings_">
+                            <button type="button" class="re-generate_image_ render_image_style_" data-story-id="${storyId}" data-scene-id="${sceneId}">
+                                Re-generate Image
+                            </button>
+                            <input type="file" id="upload_input_${sceneId}" accept="image/*" style="display: none;">
+                            <button type="button" class="upload_custom_image_${sceneId} render_image_style_" 
+                                    data-story-id="${storyId}" data-scene-id="${sceneId}"
+                                    onclick="triggerFileInput('${sceneId}', ${index})">
+                                Upload Image
+                            </button>
+                            <select class="image_resolution_ render_image_style_" style="display: none;">
+                                <option>720 x 1080</option>
+                                <option>1080 x 1920</option>
+                                <option>1920 x 1080</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>`;
+                redering_image_container.insertAdjacentHTML('beforeend', elem_html);
+                hidden_story_id_.value = storyId;
+                const container = document.getElementById(`scene_${sceneId}`);
+                const overlay = container.querySelector('.loading_overlay_full_');
+                const content = container.querySelector('.scene_content_');
+                hideOverlay(overlay, content);
+            }
+
+            async function generate_ai_images(index, totalScenes, story_id, scene_id, old_render_image) {
+                const image_render_src = document.getElementById(`render_image_src_${scene_id}`);
+                const scene_loader = document.getElementById(`custom_loader_${scene_id}`);
+                
+                let res_img_path = !old_render_image? await generateImage(story_id, scene_id, video_resolution[0], video_resolution[1]) : old_render_image;
+                console.log(`Response ${scene_id}: `, res_img_path)
+                scene_loader.style.display = "none";
+                image_render_src.src = res_img_path;
+                image_render_src.style.display = "flex";
+                // draft_story['scenes'][index]['img'] = res_img_path
+                rendered_images_list.push(res_img_path);
+                if (rendered_images_list.length == totalScenes) {
+                    enable_page_control_btn();
+                }
+            }
+            disable_page_control_btn()
             if (draft_story) {
                 for (let index = 0; index < draft_story.scenes.length; index++) {
                     renderScenesDetails(draft_story['scenes'][index], index, draft_story.story_id)
                 }
                 for (let index = 0; index < draft_story.scenes.length; index++) {
-                    generate_ai_images(draft_story.scenes.length, draft_story.story_id, draft_story.scenes[index]['scene_id'], !old_render_images? null : old_render_images[index])
+                    generate_ai_images(index, draft_story.scenes.length, draft_story.story_id, draft_story.scenes[index]['scene_id'], !draft_story['scenes'][index]['img']? null : draft_story['scenes'][index]['img'])
                 }
-
                 redering_image_container.addEventListener('click', async (event) => {
                     const target = event.target.closest('button');
                     if (!target) return;
@@ -342,20 +338,35 @@
                     else if (target.classList.contains('play_pause_audio')) play_transcribed_audio(target);
                 });
             }
+            
+            const rendered_images = [
+                "/home/magician/Documents/story_teller/cache/63e2c110-65c2-4c65-9500-d45e2f4ad304.png",
+                "/home/magician/Documents/story_teller/cache/4bae6c1d-51ae-4f12-964c-fe0a5bd39262.png",
+                "/home/magician/Documents/story_teller/cache/5448ca18-1b89-47f5-9bba-ca72e684947d.png",
+                "/home/magician/Documents/story_teller/cache/a80af567-de51-458c-ba94-d39f28d75c74.png"
+            ]
+            
             document.getElementById('next_').addEventListener('click', async () => {
-                const updated_story_data = await get_story(hidden_story_id_.value);
+                
+                const updated_story_data = await getStory(hidden_story_id_.value);
                 localStorage.setItem('story_data', JSON.stringify({
                         prompt: story_data.prompt,
                         video_dur: story_data.video_dur,
                         video_res: story_data.video_res,
                         story_id: hidden_story_id_.value,
                         draft_story: updated_story_data,
-                        audios_list: story_data.audios_list,
-                        render_images: rendered_images_list,
+                        // audios_list: story_data.audios_list,
+                        // render_images: rendered_images // rendered_images_list,
                     }));
                 window.location.href = 'generate_video.html';
             });
+        
+            window.handleImageLoad = handleImageLoad;
+            window.triggerFileInput = triggerFileInput;
         });
+    </script>
+    <script>
+        
     </script>
 </body>
 

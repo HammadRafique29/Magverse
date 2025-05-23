@@ -84,7 +84,7 @@
     <script type="module" src="scripts/index.js"></script>
 
     <script type="module">
-        import { regenerateVideo } from './scripts/api.js';
+        import { generateVideo } from './scripts/api.js';
         import { io } from "https://cdn.socket.io/4.5.0/socket.io.esm.min.js";
 
         const audio_input = document.getElementById("speaker_file_picker");
@@ -99,9 +99,8 @@
         let video_output_path = null;
         let video_progress = 0;
 
-        let draft_story = null;
         const story_data = JSON.parse(localStorage.getItem('story_data'));
-        draft_story = story_data.draft_story;
+        let video_resolution = story_data['video_res'].split("x");
         console.log(story_data);
         
         function enable_page_control_btn() {
@@ -120,7 +119,6 @@
             back_page_btn.disabled = true;
             back_page_btn.style.cursor = "not-allowed";
         }
-
         function updateProgress(newProgress, message) {
             newProgress = Math.min(100, Math.max(0, newProgress));
             progressBar.style.transition = "width 0.5s ease-in-out";
@@ -128,45 +126,32 @@
             video_progress = newProgress;
             porgressMessage.innerText = message;
         }
-
-        const audios = [
-            "/home/magician/Documents/story_teller/output_audio_24901.wav",
-            "/home/magician/Documents/story_teller/output_audio_52727.wav",
-            "/home/magician/Documents/story_teller/output_audio_65457.wav",
-            "/home/magician/Documents/story_teller/output_audio_52212.wav",
-            "/home/magician/Documents/story_teller/output_audio_15624.wav",
-            "/home/magician/Documents/story_teller/output_audio_25693.wav"
-        ]
-        const render_images = [
-            "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
-            "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
-            "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
-            "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
-            "/home/magician/Desktop/story_teller/assets/img/renderd_img.png",
-            "/home/magician/Desktop/story_teller/assets/img/renderd_img.png"
-        ]
-        
         try{
-            regenerateVideo(draft_story.story_id, draft_story.render_images, draft_story.audios_list, draft_story.video_res )
+            await generateVideo(story_data.story_id, story_data.render_images, story_data.audios_list, video_resolution )
         } catch (error) {
             enable_page_control_btn();
             porgressMessage.innerText = `Error generating video ${error.message}`;
             throw error;
         }
-        
         disable_page_control_btn();
-        const socket = io("http://127.0.0.1:8098");
-        socket.on("connect", () => { console.log("Connected to WebSocket server!")});
-        socket.on("video_progress", (data) => {
-            console.log(`Progress: ${data.progress}%`);
-            if (data.progress >= 99) {
-                socket.disconnect();
-                console.log("Socket disconnected.");
-                enable_page_control_btn();
-                porgressMessage.innerText = `Video has been saved in ${data.output}`;
-            }
-            updateProgress(data.progress, `Generate Video! Pleas Wait....`);
-        });
+        try {
+            const socket = io("http://127.0.0.1:8098");
+            socket.on("connect", () => { console.log("Connected to WebSocket server!")});
+            socket.on("video_progress", (data) => {
+                console.log(`Progress: ${data.progress}%`);
+                if (data.progress >= 99) {
+                    socket.disconnect();
+                    console.log("Socket disconnected.");
+                    enable_page_control_btn();
+                    porgressMessage.innerText = `Video has been saved in ${data.output}`;
+                }
+                updateProgress(data.progress, `Generate Video! Pleas Wait....`);
+            });
+        } catch (error) {
+            enable_page_control_btn();
+            porgressMessage.innerText = `Error generating video ${error.message}`;
+            throw error;
+        }
 
         function go_next() {
             window.location.href = 'image_render.html';
