@@ -98,10 +98,10 @@
         let is_audios_genereted = false;
         let video_output_path = null;
         let video_progress = 0;
-
+        
         const story_data = JSON.parse(localStorage.getItem('story_data'));
         let video_resolution = story_data['video_res'].split("x");
-        console.log(story_data);
+        console.log(story_data);  
         
         function enable_page_control_btn() {
             loader2.style.display = "none";
@@ -126,6 +126,7 @@
             video_progress = newProgress;
             porgressMessage.innerText = message;
         }
+        
         try{
             await generateVideo(story_data.story_id, story_data.render_images, story_data.audios_list, video_resolution )
         } catch (error) {
@@ -134,25 +135,53 @@
             throw error;
         }
         disable_page_control_btn();
-        try {
+
+        let limit = 0;
+        while (limit < 3) {
+            try {
             const socket = io("http://127.0.0.1:8098");
-            socket.on("connect", () => { console.log("Connected to WebSocket server!")});
+            socket.on("connect", () => {
+                console.log("Connected to WebSocket server!");
+                limit = 3; 
+            });
             socket.on("video_progress", (data) => {
                 console.log(`Progress: ${data.progress}%`);
                 if (data.progress >= 99) {
                     socket.disconnect();
                     console.log("Socket disconnected.");
                     enable_page_control_btn();
-                    porgressMessage.innerText = `Video has been saved in ${data.output}`;
+                    porgressMessage.innerText = `Video has been saved in --- ${data.output}`;
+                    updateProgress(100, `Video has been saved in --- ${data.output}`);
+                    next_page_btn.innerText = "Start Over";
+                    back_page_btn.disabled = true;
+                    back_page_btn.style.display = "none"; 
+                    next_page_btn.addEventListener('click', (event) => {
+                        window.location.href = "prompt_page.html";
+                    });
+                } else {
+                    updateProgress(data.progress, `Generating Video! Pleas Wait....`);
                 }
-                updateProgress(data.progress, `Generate Video! Pleas Wait....`);
             });
-        } catch (error) {
-            enable_page_control_btn();
-            porgressMessage.innerText = `Error generating video ${error.message}`;
-            throw error;
+            socket.on("connect_error", (error) => {
+                enable_page_control_btn();
+                porgressMessage.innerText = `Error generating video. Disconnected From Server. ${error.message}`;
+                console.error("Connection Error:", error);
+                socket.disconnect();
+                throw error;
+            });
+            break;
+            } catch (error) {
+            console.error("Failed to connect, retrying...", error);
+            limit++;
+            porgressMessage.innerText = `Attempt ${limit} to connect failed. Retrying in 10 seconds...`;
+            if (limit >= 3) {
+                enable_page_control_btn();
+                porgressMessage.innerText = `Error generating video. Max connection attempts reached. ${error.message}`;
+                throw error;
+            }
+            await new Promise(resolve => setTimeout(resolve, 10000));
+            }
         }
-
         function go_next() {
             window.location.href = 'image_render.html';
         }

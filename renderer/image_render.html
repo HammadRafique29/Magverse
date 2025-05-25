@@ -145,7 +145,7 @@
                                 console.error(`Failed to ${RegenerateImage? "Re-generate" : isRefresh ? "refresh" : "update"} scene`);
                                 if (isRefresh) textarea.value = originalValue;
                             } else {
-                                textarea.style.display = "none";
+                                textarea.style.display = "block";
                                 textarea.value = response.imagePrompt;
                                 hiddenInput.value = response.imagePrompt;
                             }
@@ -222,15 +222,23 @@
                 };
             }
             
-            async function triggerFileInput(sceneId, index) {
-                const result = await window.api.call('dialog:pickFile', { file_type: ['jpg', 'jpeg', 'png'], scene_id: sceneId, story_id: hidden_story_id_.value });
+            async function triggerFileInput(sceneId, index, fileType) {
+                const fileExtensions = fileType == "audio" ? ['mp3', 'wav'] : ['jpg', 'jpeg', 'png'];
+                const result = await window.api.call('dialog:pickFile', { fileExtensions: fileExtensions, file_type: fileType, scene_id: sceneId, story_id: hidden_story_id_.value });
                 if (result.canceled || !result.filePaths.length) return;
-                const filePath = result.filePaths[0];           
-                const img = document.getElementById(`render_image_src_${sceneId}`);
-                img.src = filePath;
-                // draft_story['scenes'][index]['img'] = filePath
-                rendered_images_list[index] = filePath;
-                console.log(rendered_images_list);
+                const filePath = result.filePaths[0];   
+                
+                if (fileType == "img") {
+                    const img = document.getElementById(`render_image_src_${sceneId}`);
+                    img.src = filePath;
+                    // draft_story['scenes'][index]['img'] = filePath
+                    rendered_images_list[index] = filePath;
+                    console.log(rendered_images_list);
+                } else if (fileType == "audio") {
+                    const transcribed_audio = document.getElementById(`transcribed_audio_${sceneId}`);
+                    transcribed_audio.src = filePath;
+                }
+                
             }
             
             function renderScenesDetails(scene, index, storyId) {
@@ -287,8 +295,13 @@
                             <input type="file" id="upload_input_${sceneId}" accept="image/*" style="display: none;">
                             <button type="button" class="upload_custom_image_${sceneId} render_image_style_" 
                                     data-story-id="${storyId}" data-scene-id="${sceneId}"
-                                    onclick="triggerFileInput('${sceneId}', ${index})">
+                                    onclick="triggerFileInput('${sceneId}', ${index}, 'img')">
                                 Upload Image
+                            </button>
+                            <button type="button" class="upload_custom_audio_${sceneId} render_image_style_" 
+                                    data-story-id="${storyId}" data-scene-id="${sceneId}"
+                                    onclick="triggerFileInput('${sceneId}', ${index}, 'audio')">
+                                Upload Audio
                             </button>
                             <select class="image_resolution_ render_image_style_" style="display: none;">
                                 <option>720 x 1080</option>
@@ -321,6 +334,7 @@
                     enable_page_control_btn();
                 }
             }
+            
             disable_page_control_btn()
             if (draft_story) {
                 for (let index = 0; index < draft_story.scenes.length; index++) {
