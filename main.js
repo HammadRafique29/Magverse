@@ -24,7 +24,7 @@ function createWindow() {
 
 app.whenReady().then(() => {
   createWindow();
-  setupRoutes(ipcMain); // Register backend routes
+  setupRoutes(ipcMain);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
