@@ -185,7 +185,7 @@ async function sendVideoRequest(content) {
     const responseData = await res.json();
     if (!res.ok) throw new Error(`Server returned error: ${res.status} - ${res.statusText} - ${responseData['error']}`);
     if (responseData.status != "success" ) throw new Error(responseData.error);
-    return responseData;
+    return responseData.data.video;
 
   } catch (error) {
     throw error;

@@ -7,6 +7,7 @@ const {
   py_refresh_scene, py_update_scene, py_generate_image, py_refresh_imagePrompt } = require('../scripts/pybackend');
 
 
+const stories_database = {}
 
 function parseScenes(text, scene_id) {
   return text
@@ -247,6 +248,7 @@ exports.generateVideo = async (event, args) => {
           draft_story: stories_database[story_id],
           video_res: video_resolution
         });
+        console.log("API RESPONSE: ", res)
         resolve(res);
       } catch (error) {
         reject(error);
@@ -258,12 +260,13 @@ exports.generateVideo = async (event, args) => {
 
 
 exports.filePicker = async (event, args) => {
-  const fileType = args?.file_type || ['mp3', 'wav'];
+  const fileExtensions = args?.fileExtensions || ['mp3', 'wav'];
+  const fileType = args?.file_type || "audio";
   const scene_id = args?.scene_id || null;
   const story_id = args?.story_id || null;
-  const image_path = await dialog.showOpenDialog({
+  const file_path = await dialog.showOpenDialog({
     properties: ['openFile'],
-    filters: [{ name: 'Files', extensions: fileType }]
+    filters: [{ name: 'Files', extensions: fileExtensions }]
   });
   if (scene_id) {
     if (!stories_database[story_id]) {
@@ -276,7 +279,12 @@ exports.filePicker = async (event, args) => {
     if (index === -1) {
       throw new Error(`Scene not found with ID ${scene_id}`);
     }
-    stories_database[story_id]['scenes'][index]['img'] = image_path.filePaths[0];
+    if (fileType == "audio") {
+      stories_database[story_id]['scenes'][index]['audio'] = file_path.filePaths[0];
+    } else if( fileType == "img") {
+      stories_database[story_id]['scenes'][index]['img'] = file_path.filePaths[0];
+    }
+    
   }
-  return image_path;
+  return file_path;
 };
