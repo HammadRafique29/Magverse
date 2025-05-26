@@ -12,10 +12,10 @@ function createWindow() {
     }
   });
 
-  // win.removeMenu();
+  win.removeMenu();
   win.loadFile('renderer/index.html');
   // win.loadFile('renderer/image_render.html');
-  // Register shortcut for opening DevTools
+  // // Register shortcut for opening DevTools
   // globalShortcut.register('CommandOrControl+Shift+I', () => {
   //   win.webContents.toggleDevTools();
   // });

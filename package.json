@@ -17,7 +17,8 @@
   },
   "license": "MIT",
   "scripts": {
-    "start": "nodemon --exec electron main.js",
+    "dev": "nodemon --exec electron main.js",
+    "start": "electron main.js",
     "build": "electron-builder"
   },
   "build": {
