@@ -25,7 +25,14 @@
     "productName": "Magverse",
     "copyright": "Copyright © 2025 Hammad Rafique",
     "files": [
-      "**/*"
+      "main.js",
+      "preload.js",
+      "public/**/*",
+      "renderer/**/*",
+      "backend/**/*",
+      "server/**/*",
+      "styles/**/*",
+      "package.json"
     ],
     "directories": {
       "buildResources": "assets",
